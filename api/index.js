@@ -156,6 +156,16 @@ app.get("/scripts.js", (req, res) => {
   res.sendFile(path.join(rootDir, "scripts.js"));
 });
 
+// Serve images and audio files
+app.get("/:file", (req, res, next) => {
+  const fileName = path.basename(req.params.file);
+  const filePath = path.join(rootDir, fileName);
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    return res.sendFile(filePath);
+  }
+  next();
+});
+
 // Authentication Middleware
 function requireAdmin(req, res, next) {
   const authHeader = req.headers.authorization;
