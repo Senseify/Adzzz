@@ -203,6 +203,21 @@ app.post("/api/stars-progress", (req, res) => {
   }
 });
 
+// 5. Generic interaction tracking (Unsaid thoughts read, moments opened)
+app.post("/api/interaction", (req, res) => {
+  try {
+    const { name, data, completed } = req.body;
+    if (!name) return res.status(400).json({ success: false });
+    const now = new Date().toISOString();
+    const completedVal = typeof completed === "number" ? completed : (completed ? 1 : 0);
+    upsertInteractionStmt.run(name, data || "", completedVal, now);
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Error saving interaction:", err);
+    return res.status(500).json({ success: false });
+  }
+});
+
 // =======================================================================
 // AUTHENTICATION ENDPOINTS
 // =======================================================================
@@ -218,9 +233,9 @@ app.post("/api/admin/login", (req, res) => {
 
   res.cookie("admin_session", token, {
     httpOnly: true,
-    secure: false, // works on localhost; can be set true on HTTPS
+    secure: false,
     sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
   return res.json({ success: true, message: "Welcome back." });
@@ -252,9 +267,11 @@ app.get("/api/admin/data", requireAdmin, (req, res) => {
     const futureLetter = getLatestLetterStmt.all()[0] || null;
     const interactions = getAllInteractionsStmt.all();
 
-    // Calculate unique questions answered out of 6
+    // Calculate metrics
     const answeredQuestionIds = new Set(answers.map((a) => a.question_id));
     const starsInteraction = interactions.find((i) => i.name === "stars_message");
+    const momentsInteraction = interactions.find((i) => i.name === "moments_opened_count");
+    const unsaidInteraction = interactions.find((i) => i.name === "unsaid_thoughts_read");
 
     return res.json({
       success: true,
@@ -263,7 +280,9 @@ app.get("/api/admin/data", requireAdmin, (req, res) => {
         totalQuestionsAnswered: answers.length,
         questionsAskedCount: questions.length,
         hasFutureLetter: Boolean(futureLetter),
-        starsCompleted: Boolean(starsInteraction && starsInteraction.completed)
+        starsCompleted: Boolean(starsInteraction && starsInteraction.completed),
+        momentsOpenedCount: momentsInteraction ? (parseInt(momentsInteraction.data, 10) || momentsInteraction.completed || 0) : 0,
+        unsaidThoughtsRead: Boolean(unsaidInteraction && unsaidInteraction.completed)
       },
       answers,
       questions,

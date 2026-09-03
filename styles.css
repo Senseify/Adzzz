@@ -2489,7 +2489,7 @@ html, body {
 #since-it-started {
   position: relative;
   padding: 7rem 1.5rem 6rem;
-  background: radial-gradient(circle at center, #090a16 0%, #030306 100%);
+  background: transparent;
   overflow: hidden;
   text-align: center;
 }
@@ -2501,9 +2501,258 @@ html, body {
   transform: translate(-50%, -50%);
   width: 600px;
   height: 380px;
-  background: radial-gradient(ellipse at center, rgba(201,168,76,0.12) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(201,168,76,0.08) 0%, transparent 70%);
   filter: blur(50px);
   pointer-events: none;
+}
+
+/* =======================================================================
+   UNSAID THOUGHTS, PUT INTO WORDS
+======================================================================= */
+#unsaid-thoughts-section {
+  position: relative;
+  padding: 6rem 1.5rem 6.5rem;
+  background: transparent;
+  overflow: hidden;
+  text-align: center;
+}
+
+.unsaid-head {
+  max-width: 680px;
+  margin: 0 auto 2.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.unsaid-kicker {
+  font-size: 0.74rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+}
+
+.unsaid-head h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 0.6rem;
+}
+
+.unsaid-head p {
+  color: rgba(240,238,232,0.65);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.unsaid-trigger-wrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+}
+
+.unsaid-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.95rem 2.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(201,168,76,0.38);
+  background: radial-gradient(circle at 35% 35%, rgba(243,223,155,0.25) 0%, rgba(201,168,76,0.15) 100%);
+  color: var(--gold-pale);
+  font-size: 0.84rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 24px rgba(201,168,76,0.18);
+  transition: all 0.3s ease;
+}
+
+.unsaid-open-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  border-color: rgba(243,223,155,0.7);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.55), 0 0 32px rgba(201,168,76,0.3);
+  color: #fff;
+}
+
+/* =======================================================================
+   UNSAID THOUGHTS FULLSCREEN READING EXPERIENCE
+======================================================================= */
+.unsaid-reader-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(4, 5, 12, 0.97);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  display: none;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.unsaid-reader-modal.active {
+  display: flex;
+  opacity: 1;
+}
+
+.unsaid-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 2rem;
+  background: rgba(6, 7, 16, 0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(201,168,76,0.18);
+}
+
+.unsaid-bar-tag {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.unsaid-progress-pill {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-pale);
+  background: rgba(201,168,76,0.12);
+  border: 1px solid rgba(201,168,76,0.28);
+  padding: 0.35rem 0.95rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.unsaid-close-btn {
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.25);
+  color: rgba(240,238,232,0.75);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.unsaid-close-btn:hover {
+  border-color: rgba(243,223,155,0.6);
+  color: #fff;
+  background: rgba(201,168,76,0.1);
+}
+
+.unsaid-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding: 4rem 1.5rem 8rem;
+}
+
+.unsaid-reading-track {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5.5rem;
+}
+
+.unsaid-thought-card {
+  position: relative;
+  padding: 3rem 2.8rem;
+  border-radius: 28px;
+  border: 1px solid rgba(201,168,76,0.18);
+  background: linear-gradient(160deg, rgba(16,18,36,0.92) 0%, rgba(8,9,18,0.96) 100%);
+  box-shadow: 0 25px 70px rgba(0,0,0,0.5), 0 0 24px rgba(201,168,76,0.06);
+  transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.unsaid-thought-card.in-view {
+  border-color: rgba(201,168,76,0.42);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 30px rgba(201,168,76,0.14);
+}
+
+.thought-number-badge {
+  display: inline-flex;
+  font-size: 0.74rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.8rem;
+  font-weight: 600;
+}
+
+.thought-prose {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.25rem, 2.4vw, 1.55rem);
+  line-height: 1.85;
+  color: rgba(240,238,232,0.95);
+  letter-spacing: 0.015em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.thought-prose strong {
+  color: var(--gold-pale);
+  font-weight: 600;
+}
+
+.unsaid-closing-card {
+  text-align: center;
+  padding: 4rem 2rem;
+  border-radius: 28px;
+  border: 1px solid rgba(201,168,76,0.3);
+  background: radial-gradient(circle at center, rgba(201,168,76,0.15) 0%, rgba(10,12,24,0.95) 100%);
+  box-shadow: 0 25px 70px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.closing-sparkle {
+  color: var(--gold);
+  font-size: 1.2rem;
+  letter-spacing: 0.4em;
+}
+
+.closing-message {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+  font-style: italic;
+  color: var(--white);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.unsaid-return-btn {
+  padding: 0.85rem 2.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(201,168,76,0.4);
+  background: radial-gradient(circle at 35% 35%, rgba(243,223,155,0.25) 0%, rgba(201,168,76,0.15) 100%);
+  color: var(--gold-pale);
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.unsaid-return-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(243,223,155,0.7);
+  box-shadow: 0 0 24px rgba(201,168,76,0.25);
+  color: #fff;
 }
 
 .since-started-head {
@@ -3443,5 +3692,27 @@ html, body {
   #constellation-map.heart-map {
     min-height: 460px;
     height: 62vh;
+  }
+
+  .unsaid-top-bar {
+    padding: 1rem 1.2rem;
+  }
+
+  .unsaid-scroll-container {
+    padding: 2.5rem 1rem 6rem;
+  }
+
+  .unsaid-reading-track {
+    gap: 3.5rem;
+  }
+
+  .unsaid-thought-card {
+    padding: 2.2rem 1.5rem;
+    border-radius: 22px;
+  }
+
+  .thought-prose {
+    font-size: 1.22rem;
+    line-height: 1.75;
   }
 }

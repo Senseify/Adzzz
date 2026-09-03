@@ -164,7 +164,7 @@
     /* Metrics Grid */
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
       gap: 1.2rem;
       margin-bottom: 2.5rem;
     }
@@ -414,6 +414,14 @@
         <span class="metric-label">Stars Message</span>
         <span id="metric-stars" class="metric-val">No</span>
       </div>
+      <div class="metric-card">
+        <span class="metric-label">18 Moments Opened</span>
+        <span id="metric-moments" class="metric-val">0 / 18</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Unsaid Thoughts</span>
+        <span id="metric-unsaid" class="metric-val">No</span>
+      </div>
     </div>
 
     <nav class="admin-tabs">
@@ -543,6 +551,13 @@
           });
       }
 
+      const metricAnswered = document.getElementById("metric-answered");
+      const metricQuestions = document.getElementById("metric-questions");
+      const metricLetter = document.getElementById("metric-letter");
+      const metricStars = document.getElementById("metric-stars");
+      const metricMoments = document.getElementById("metric-moments");
+      const metricUnsaid = document.getElementById("metric-unsaid");
+
       function renderMetrics() {
         if (!dashboardData) return;
         const { stats } = dashboardData;
@@ -550,6 +565,8 @@
         metricQuestions.textContent = stats.questionsAskedCount;
         metricLetter.textContent = stats.hasFutureLetter ? "Yes ❤️" : "No";
         metricStars.textContent = stats.starsCompleted ? "Yes ⭐" : "No";
+        if (metricMoments) metricMoments.textContent = `${stats.momentsOpenedCount || 0} / 18`;
+        if (metricUnsaid) metricUnsaid.textContent = stats.unsaidThoughtsRead ? "Yes ❤️" : "No";
       }
 
       function renderFeed() {

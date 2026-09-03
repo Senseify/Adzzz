@@ -409,10 +409,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Section Entrance Stagger Animations
   gsap.utils
-    .toArray("#final-note, #aditi-photo-reveal, #eyes-love-note, #since-it-started, #extra-links-section, #questions-for-her, #questions-for-him, #future-letter-section, #things-to-do-section, #stars-message-section, #hundred-reasons-section, #promises-section, #memory-archive")
+    .toArray("#final-note, #aditi-photo-reveal, #eyes-love-note, #since-it-started, #unsaid-thoughts-section, #extra-links-section, #questions-for-her, #questions-for-him, #future-letter-section, #things-to-do-section, #stars-message-section, #hundred-reasons-section, #promises-section, #memory-archive")
     .forEach((section) => {
       const items = section.querySelectorAll(
-        "h2, p, .photo-reveal-grid, .eyes-card, .since-started-shell, .extra-links-grid, .ask-grid, .ask-him-shell, .future-parchment-card, .things-lock-card, .things-content, .stars-sky-dome, .reasons-controls, .reasons-shell, .promises-controls, .promises-shell, #constellation-map"
+        "h2, p, .photo-reveal-grid, .eyes-card, .since-started-shell, .unsaid-trigger-wrap, .extra-links-grid, .ask-grid, .ask-him-shell, .future-parchment-card, .things-lock-card, .things-content, .stars-sky-dome, .reasons-controls, .reasons-shell, .promises-controls, .promises-shell, #constellation-map"
       );
       if (!items.length) return;
 
@@ -507,12 +507,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  const viewedMoments = new Set();
+
   function openPhotoModal(index) {
     if (!photoModal) return;
     updateModalPhoto(index);
     photoModal.classList.add("active");
     photoModal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+
+    if (!viewedMoments.has(index)) {
+      viewedMoments.add(index);
+      fetch("/api/interaction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "moments_opened_count", data: String(viewedMoments.size), completed: viewedMoments.size })
+      }).catch(() => {});
+    }
   }
 
   function closePhotoModal() {
@@ -924,6 +935,74 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  // =======================================================================
+  // UNSAID THOUGHTS READING EXPERIENCE
+  // =======================================================================
+  const unsaidReaderModal = document.getElementById("unsaid-reader-modal");
+  const openUnsaidBtn = document.getElementById("open-unsaid-btn");
+  const unsaidCloseBtn = document.getElementById("unsaid-close-btn");
+  const unsaidReturnBtn = document.getElementById("unsaid-return-btn");
+  const unsaidScrollContainer = document.getElementById("unsaid-scroll-container");
+  const unsaidProgressIndicator = document.getElementById("unsaid-progress-indicator");
+  const unsaidThoughtCards = document.querySelectorAll(".unsaid-thought-card");
+
+  let unsaidMarkedAsRead = false;
+
+  function openUnsaidReader() {
+    if (!unsaidReaderModal) return;
+    unsaidReaderModal.classList.add("active");
+    unsaidReaderModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    if (unsaidScrollContainer) unsaidScrollContainer.scrollTop = 0;
+    if (unsaidProgressIndicator) unsaidProgressIndicator.textContent = "THOUGHT 01 / 06";
+  }
+
+  function closeUnsaidReader() {
+    if (!unsaidReaderModal) return;
+    unsaidReaderModal.classList.remove("active");
+    unsaidReaderModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  if (openUnsaidBtn) openUnsaidBtn.addEventListener("click", openUnsaidReader);
+  if (unsaidCloseBtn) unsaidCloseBtn.addEventListener("click", closeUnsaidReader);
+  if (unsaidReturnBtn) unsaidReturnBtn.addEventListener("click", closeUnsaidReader);
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && unsaidReaderModal && unsaidReaderModal.classList.contains("active")) {
+      closeUnsaidReader();
+    }
+  });
+
+  if (unsaidScrollContainer && unsaidThoughtCards.length) {
+    unsaidScrollContainer.addEventListener("scroll", () => {
+      const containerRect = unsaidScrollContainer.getBoundingClientRect();
+      const centerY = containerRect.top + containerRect.height / 2;
+
+      unsaidThoughtCards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const isInView = rect.top <= centerY && rect.bottom >= centerY;
+        card.classList.toggle("in-view", isInView);
+
+        if (isInView) {
+          const idx = card.dataset.index;
+          if (unsaidProgressIndicator && idx) {
+            unsaidProgressIndicator.textContent = `THOUGHT ${String(idx).padStart(2, "0")} / 06`;
+          }
+
+          if (Number(idx) === 6 && !unsaidMarkedAsRead) {
+            unsaidMarkedAsRead = true;
+            fetch("/api/interaction", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: "unsaid_thoughts_read", completed: 1, data: "completed" })
+            }).catch(() => {});
+          }
+        }
+      });
+    });
+  }
 
   updateSongMeta();
   updateVoiceMeta();
