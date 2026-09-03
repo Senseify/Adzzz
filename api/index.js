@@ -134,6 +134,28 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Serve static assets from project root (styles, scripts, images, audio)
+const rootDir = path.join(__dirname, "..");
+app.use(express.static(rootDir));
+
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(rootDir, "admin.html"));
+});
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(rootDir, "index.html"));
+});
+
+app.get("/styles.css", (req, res) => {
+  res.setHeader("Content-Type", "text/css; charset=utf-8");
+  res.sendFile(path.join(rootDir, "styles.css"));
+});
+
+app.get("/scripts.js", (req, res) => {
+  res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+  res.sendFile(path.join(rootDir, "scripts.js"));
+});
+
 // Authentication Middleware
 function requireAdmin(req, res, next) {
   const authHeader = req.headers.authorization;
