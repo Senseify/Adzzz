@@ -378,8 +378,8 @@
       <h2>Secret Admin</h2>
       <p>Enter passkey to open Aditi's responses & letter.</p>
       <form id="login-form" class="admin-auth-form">
-        <input id="admin-pass" type="password" class="admin-input" placeholder="Enter passkey" required autocomplete="current-password">
-        <button type="submit" class="admin-btn">Authenticate</button>
+        <input id="admin-pass" type="password" class="admin-input" placeholder="Enter passkey (992012)" required autocomplete="current-password" autofocus>
+        <button id="auth-submit-btn" type="submit" class="admin-btn">Authenticate</button>
       </form>
       <div id="auth-err" class="admin-err"></div>
     </div>
@@ -455,6 +455,17 @@
       let activeTab = "all";
       let dashboardData = null;
 
+      const API_BASE = window.location.protocol.startsWith("http") ? "" : "http://localhost:8080";
+
+      function getAuthHeaders(extraHeaders = {}) {
+        const token = localStorage.getItem("admin_session_token");
+        const headers = { ...extraHeaders };
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        return headers;
+      }
+
       function formatTimestamp(isoStr) {
         if (!isoStr) return "";
         try {
@@ -473,7 +484,10 @@
       }
 
       function checkAuth() {
-        fetch("/api/admin/check-auth")
+        fetch(`${API_BASE}/api/admin/check-auth`, {
+          credentials: "include",
+          headers: getAuthHeaders()
+        })
           .then((r) => r.json())
           .then((res) => {
             if (res.authenticated) {
@@ -499,29 +513,50 @@
       loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
         authErr.textContent = "";
-        const password = adminPass.value;
+        const password = adminPass.value.trim();
+        const submitBtn = document.getElementById("auth-submit-btn");
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Verifying...";
+        }
 
-        fetch("/api/admin/login", {
+        fetch(`${API_BASE}/api/admin/login`, {
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password })
         })
           .then((r) => r.json())
           .then((res) => {
             if (res.success) {
+              if (res.token) {
+                localStorage.setItem("admin_session_token", res.token);
+              }
               adminPass.value = "";
               showDashboard();
             } else {
               authErr.textContent = res.message || "Invalid passkey.";
             }
           })
-          .catch(() => {
-            authErr.textContent = "Network error. Try again.";
+          .catch((err) => {
+            console.error("Login fetch error:", err);
+            authErr.textContent = "Cannot connect to server. Ensure server is running on port 8080.";
+          })
+          .finally(() => {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Authenticate";
+            }
           });
       });
 
       logoutBtn.addEventListener("click", () => {
-        fetch("/api/admin/logout", { method: "POST" })
+        localStorage.removeItem("admin_session_token");
+        fetch(`${API_BASE}/api/admin/logout`, {
+          method: "POST",
+          credentials: "include",
+          headers: getAuthHeaders()
+        })
           .then(() => showLogin())
           .catch(() => showLogin());
       });
@@ -536,7 +571,10 @@
       });
 
       function loadDashboardData() {
-        fetch("/api/admin/data")
+        fetch(`${API_BASE}/api/admin/data`, {
+          credentials: "include",
+          headers: getAuthHeaders()
+        })
           .then((r) => {
             if (!r.ok) throw new Error("Unauthorized");
             return r.json();
@@ -664,9 +702,10 @@
             const replyText = textarea.value.trim();
             if (!replyText) return;
 
-            fetch("/api/admin/reply", {
+            fetch(`${API_BASE}/api/admin/reply`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              headers: getAuthHeaders({ "Content-Type": "application/json" }),
               body: JSON.stringify({ questionId: qid, replyText })
             })
               .then((r) => r.json())

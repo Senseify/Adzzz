@@ -8,7 +8,7 @@ const { DatabaseSync } = require("node:sqlite");
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Aditi2024!";
+const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || "992012").trim();
 
 // Ensure data folder exists
 const dataDir = path.join(__dirname, "data");
@@ -83,7 +83,7 @@ const upsertInteractionStmt = db.prepare(`
 const getAllAnswersStmt = db.prepare(`
   SELECT id, question_id, question_text, answer_text, status, created_at
   FROM answers
-  ORDER BY question_id ASC, id DESC
+  ORDER BY id DESC
 `);
 
 const getAllQuestionsStmt = db.prepare(`
@@ -119,13 +119,26 @@ const updateAnswerStatusStmt = db.prepare(`
 // In-memory active session tokens for secure admin access
 const activeSessions = new Set();
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Authentication Middleware
 function requireAdmin(req, res, next) {
-  const token = req.cookies.admin_session;
+  const authHeader = req.headers.authorization;
+  const bearerToken = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
+  const token = req.cookies.admin_session || bearerToken;
   if (token && activeSessions.has(token)) {
     return next();
   }
@@ -223,9 +236,9 @@ app.post("/api/interaction", (req, res) => {
 // =======================================================================
 
 app.post("/api/admin/login", (req, res) => {
-  const { password } = req.body;
-  if (!password || password !== ADMIN_PASSWORD) {
-    return res.status(401).json({ success: false, message: "Incorrect password." });
+  const entered = String(req.body.password || "").trim();
+  if (!entered || entered !== ADMIN_PASSWORD) {
+    return res.status(401).json({ success: false, message: "Incorrect passkey." });
   }
 
   const token = crypto.randomBytes(32).toString("hex");
@@ -238,11 +251,13 @@ app.post("/api/admin/login", (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
-  return res.json({ success: true, message: "Welcome back." });
+  return res.json({ success: true, message: "Welcome back.", token });
 });
 
 app.post("/api/admin/logout", (req, res) => {
-  const token = req.cookies.admin_session;
+  const authHeader = req.headers.authorization;
+  const bearerToken = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
+  const token = req.cookies.admin_session || bearerToken;
   if (token) {
     activeSessions.delete(token);
   }
@@ -251,7 +266,9 @@ app.post("/api/admin/logout", (req, res) => {
 });
 
 app.get("/api/admin/check-auth", (req, res) => {
-  const token = req.cookies.admin_session;
+  const authHeader = req.headers.authorization;
+  const bearerToken = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
+  const token = req.cookies.admin_session || bearerToken;
   const isAuthenticated = Boolean(token && activeSessions.has(token));
   return res.json({ authenticated: isAuthenticated });
 });
