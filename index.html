@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday, Aditi — 14 Letters</title>
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+
+  <style>
+    .letter-title {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold);
+      font-size: 1.5rem;
+      font-weight: 600;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .letter-card p {
+      margin-bottom: 1.2rem;
+      line-height: 1.6;
+    }
+
+    .letter-card p:last-child {
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="enhance-btn" type="button" aria-label="Enhance experience">
+    <span class="enhance-dot"></span>
+    Enhance Experience
+  </button>
+
+  <div id="music-hint" class="music-hint" role="status">
+    <span class="music-hint-icon">♫</span>
+    <span>Tap to play <em>Unakkul Naane</em> ✦</span>
+  </div>
+
+  <audio id="bg-song" preload="metadata" loop>
+    <source src="unakkul-naane.mp3" type="audio/mpeg">
+  </audio>
+
+  <section id="song-player-section" class="hidden-player" aria-label="Background song player">
+    <div class="song-player">
+      <div class="song-cover">
+        <img src="song-cover.jpg" alt="Song cover art">
+      </div>
+
+      <div class="song-meta">
+        <div class="song-title">Unakkul Naane</div>
+
+        <div class="song-progress-row">
+          <span id="song-current-time">0:00</span>
+          <div class="song-progress" aria-hidden="true">
+            <div id="song-progress-fill"></div>
+          </div>
+          <span id="song-duration">0:00</span>
+        </div>
+      </div>
+
+      <div class="song-controls">
+        <button id="song-play-pause" type="button" aria-label="Pause or play song">❚❚</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="pbar"></div>
+
+  <div id="cur"></div>
+  <div id="cur-r"></div>
+
+  <div id="particle-container"></div>
+
+  <div id="side-nav">
+    <div id="side-nav-label">14 LETTERS</div>
+    <div class="prog-dot active"><span>1</span></div>
+    <div class="prog-dot"><span>2</span></div>
+    <div class="prog-dot"><span>3</span></div>
+    <div class="prog-dot"><span>4</span></div>
+    <div class="prog-dot"><span>5</span></div>
+    <div class="prog-dot"><span>6</span></div>
+    <div class="prog-dot"><span>7</span></div>
+    <div class="prog-dot"><span>8</span></div>
+    <div class="prog-dot"><span>9</span></div>
+    <div class="prog-dot"><span>10</span></div>
+    <div class="prog-dot"><span>11</span></div>
+    <div class="prog-dot"><span>12</span></div>
+    <div class="prog-dot"><span>13</span></div>
+    <div class="prog-dot"><span>14</span></div>
+  </div>
+
+  <section id="hero">
+    <div class="hero-bg-glow"></div>
+
+    <div class="h-pre">Happy Birthday</div>
+    <div class="h-for">for Aditi</div>
+
+    <h1 class="h-letters">
+      14 <em>Letters</em>
+      <span>made of memories</span>
+    </h1>
+
+    <div class="h-tagline">Happy to see a smile on your face</div>
+    <span class="h-heart">✦</span>
+    <div class="h-divider"></div>
+    <div class="h-hint">scroll to begin</div>
+  </section>
+
+  <div id="stage">
+    <div id="stage-viewport">
+
+      <div class="mem-scene" data-index="0" data-side="left">
+        <div class="photo-card">
+          <img src="letter-01.png" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Moments that stay forever ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">The First Time I Noticed You</h3>
+          <p>I still remember April 2024, the day where everything started.</p>
+          <p>A simple activity became a memory I would never forget.</p>
+          <p>You stood out to me because I felt important to you.</p>
+          <p>You weren't shy or uncomfortable, you talked with me like how I wanted to.</p>
+          <p>I still remember you defending my name against Lohith that day.</p>
+          <p>It was a small moment, but it showed me that I mattered to you.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="1" data-side="right">
+        <div class="photo-card">
+          <img src="letter-02.png" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">A beautiful day ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">The Little Things You Do</h3>
+          <p>Sometimes the smallest things mean the most.</p>
+          <p>I love how you always check on me and ask if I am doing okay.</p>
+          <p>The way you care during our conversations shows how thoughtful you are.</p>
+          <p>Even little things like the way you pose for photos like I js don't know, I always fall for it.</p>
+          <p>Just being yourself is something I appreciate.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="2" data-side="left">
+        <div class="photo-card">
+          <img src="letter-03.png" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Unforgettable ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">The Person Behind Your Smile</h3>
+          <p>I really love the person you are.</p>
+          <p>You care about me, make me feel important.</p>
+          <p>Your dark humor and elite ball knowledge can make anyone laugh, that's a reason I fell for you.</p>
+          <p>These qualities are what make you special to me.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="3" data-side="right">
+        <div class="photo-card">
+          <img src="letter-04.jpg" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Precious memories ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">Moments I Will Always Remember</h3>
+          <p>Some moments may seem small, but they stay forever.</p>
+          <p>I still remember when you asked me to sit with you for three whole periods when I felt alone.</p>
+          <p>Your sports day handshake gave me confidence and became connected with my three gold medals.</p>
+          <p>Even the hair band you gave me for my birthday became a memory I will always keep.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="4" data-side="left">
+        <div class="photo-card">
+          <img src="letter-05.png" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Smiles all around ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">The Conversations That Made My Day</h3>
+          <p>Sometimes a simple conversation can change my whole mood.</p>
+          <p>Talking to you after school or before going to bed always makes my day better.</p>
+          <p>Even normal conversations with you feel special because they bring comfort and happiness.</p>
+          <p>I have always loved texting you because those small moments became memories I really value.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="5" data-side="right">
+        <div class="photo-card">
+          <img src="letter-06.jpg" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Golden hours ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">The Comfort You Bring</h3>
+          <p>There is something special about talking to you.</p>
+          <p>When I'm with you, I never felt like I had to pretend to be someone else.</p>
+          <p>I could just be myself and feel comfortable.</p>
+          <p>You have a way of making normal days feel better, and that comfort is something I truly appreciate.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="6" data-side="left">
+        <div class="photo-card">
+          <img src="letter-07.jpg" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Perfect timing ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">Your Heart And Your Efforts</h3>
+          <p>One thing I admire about you is how caring and loving you are.</p>
+          <p>You always look out for me and put effort into the people you care about.</p>
+          <p>Even the little things you do show how kind your heart is.</p>
+          <p>Your kindness is one of the things that makes you special.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="7" data-side="right">
+        <div class="photo-card">
+          <img src="letter-08.jpg" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Just you and me ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">The Math Lab Memory</h3>
+          <p>One of my favourite memories is from 8th grade.</p>
+          <p>I still remember when Elizabeth mam made both of us sit together during math lab.</p>
+          <p>We talked a lot while doing our work, and that simple day became one of my favourite memories.</p>
+          <p>Sometimes the smallest moments become the most unforgettable ones.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="8" data-side="left">
+        <div class="photo-card">
+          <img src="letter-09.jpg" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Looking back ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">Understanding You Better</h3>
+          <p>Over time, I started understanding you more and the kind of person you truly are.</p>
+          <p>I realized how much you care, how deeply you feel, and how much effort you put into things.</p>
+          <p>I appreciate every side of you and the person you are.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="9" data-side="right">
+        <div class="photo-card">
+          <img src="letter-10.jpg" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Into the future ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">Always Here For You</h3>
+          <p>I want you to know that I will always support you.</p>
+          <p>Whenever things feel difficult, I want to be someone you can talk to and rely on.</p>
+          <p>You never have to keep everything inside.</p>
+          <p>I will always be someone who listens and stands by you, and please I beg you don't bottle up just tell me if I did something.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="10" data-side="left">
+        <div class="photo-card">
+          <img src="letter-11.jpg" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Laughs we shared ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">Your Dreams And Your Hard Work</h3>
+          <p>I really admire your dedication towards your dreams.</p>
+          <p>Your goal of becoming an IIT graduate shows how much determination you have.</p>
+          <p>You work hard, do well in studies, and always try your best.</p>
+          <p>I also appreciate how you help me and support me with my studies.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="11" data-side="right">
+        <div class="photo-card">
+          <img src="letter-12.jpg" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">A gentle breeze ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">Thank You For Everything</h3>
+          <p>I just want to say thank you for everything.</p>
+          <p>Thank you for the hair band, the handshake, calling me to sit with you, checking on me, and every little memory we have shared.</p>
+          <p>All those small moments became something I will always remember.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="12" data-side="left">
+        <div class="photo-card">
+          <img src="letter-13.jpg" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Almost there ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">The Memories Still Ahead</h3>
+          <p>We already have many memories that I will always treasure.</p>
+          <p>But I hope there are still many more moments waiting for us in the future.</p>
+          <p>Some memories become special because of what happened, but others become special because of who was there.</p>
+        </div>
+      </div>
+
+      <div class="mem-scene" data-index="13" data-side="right">
+        <div class="photo-card">
+          <img src="letter-14.jpg" alt="Memory">
+          <div class="photo-vignette"></div>
+        </div>
+        <div class="mem-tag">Happy Birthday ✦</div>
+        <div class="letter-card">
+          <h3 class="letter-title">Happy Birthday Aditi</h3>
+          <p>Happy 14th Birthday, Aditi.</p>
+          <p>I hope your day is filled with happiness, smiles, and everything you deserve.</p>
+          <p>Thank you for being the amazing person you are and for all the memories you have given me.</p>
+          <p>Never stop being yourself.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="memory-flash" aria-hidden="true"></div>
+
+  <section id="final-note">
+    <div class="final-glow"></div>
+    <p class="final-kicker">for you, always ✦</p>
+    <h2>Some people become memories.<br> You became a whole universe.</h2>
+    <p class="final-text">
+      These 14 letters are only a small way of saying thank you for your kindness,
+      your presence, and all the moments that became special because they had you in them.
+    </p>
+    <p class="final-sign">Made with love and effort, for Aditi.</p>
+  </section>
+
+  <section id="aditi-photo-reveal">
+    <div class="photo-reveal-head">
+      <p class="photo-reveal-kicker">a little more of you ✦</p>
+      <h2>18 frames, one name</h2>
+      <p>Hover on each card to reveal the moment, or click to enlarge.</p>
+    </div>
+
+    <div class="photo-reveal-grid">
+      <article class="reveal-card" data-index="0" data-title="The Beginning" data-caption="April 2024 — where everything started."><div class="reveal-media" role="button" aria-label="Open photo 01: The Beginning"><img src="./letter-01.png" alt="Aditi photo 01 - The Beginning" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">01</span></div></div></article>
+      <article class="reveal-card" data-index="1" data-title="The Little Things" data-caption="Checking on me and thoughtful conversations."><div class="reveal-media" role="button" aria-label="Open photo 02: The Little Things"><img src="./letter-02.png" alt="Aditi photo 02 - The Little Things" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">02</span></div></div></article>
+      <article class="reveal-card" data-index="2" data-title="Behind Your Smile" data-caption="Dark humor, elite ball knowledge, and laughs."><div class="reveal-media" role="button" aria-label="Open photo 03: Behind Your Smile"><img src="./letter-03.png" alt="Aditi photo 03 - Behind Your Smile" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">03</span></div></div></article>
+      <article class="reveal-card" data-index="3" data-title="Unforgettable Moments" data-caption="Three periods together and the sports day handshake."><div class="reveal-media" role="button" aria-label="Open photo 04: Unforgettable Moments"><img src="./letter-04.jpg" alt="Aditi photo 04 - Unforgettable Moments" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">04</span></div></div></article>
+      <article class="reveal-card" data-index="4" data-title="Conversations That Made My Day" data-caption="Late night texts and comfort."><div class="reveal-media" role="button" aria-label="Open photo 05: Conversations That Made My Day"><img src="./letter-05.png" alt="Aditi photo 05 - Conversations That Made My Day" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">05</span></div></div></article>
+      <article class="reveal-card" data-index="5" data-title="The Comfort You Bring" data-caption="Feeling completely comfortable being myself."><div class="reveal-media" role="button" aria-label="Open photo 06: The Comfort You Bring"><img src="./letter-06.jpg" alt="Aditi photo 06 - The Comfort You Bring" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">06</span></div></div></article>
+      <article class="reveal-card" data-index="6" data-title="Your Caring Heart" data-caption="Always looking out and putting effort for people you care about."><div class="reveal-media" role="button" aria-label="Open photo 07: Your Caring Heart"><img src="./letter-07.jpg" alt="Aditi photo 07 - Your Caring Heart" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">07</span></div></div></article>
+      <article class="reveal-card" data-index="7" data-title="The Math Lab Memory" data-caption="8th grade math lab — a simple day that became unforgettable."><div class="reveal-media" role="button" aria-label="Open photo 08: The Math Lab Memory"><img src="./letter-08.jpg" alt="Aditi photo 08 - The Math Lab Memory" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">08</span></div></div></article>
+      <article class="reveal-card" data-index="8" data-title="Understanding You" data-caption="Realizing how deeply you feel and how special you are."><div class="reveal-media" role="button" aria-label="Open photo 09: Understanding You"><img src="./letter-09.jpg" alt="Aditi photo 09 - Understanding You" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">09</span></div></div></article>
+      <article class="reveal-card" data-index="9" data-title="Always Here For You" data-caption="Someone who listens and always stands by you."><div class="reveal-media" role="button" aria-label="Open photo 10: Always Here For You"><img src="./letter-10.jpg" alt="Aditi photo 10 - Always Here For You" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">10</span></div></div></article>
+      <article class="reveal-card" data-index="10" data-title="Dreams & Determination" data-caption="Admiring your hard work and your IIT aspirations."><div class="reveal-media" role="button" aria-label="Open photo 11: Dreams & Determination"><img src="./letter-11.jpg" alt="Aditi photo 11 - Dreams & Determination" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">11</span></div></div></article>
+      <article class="reveal-card" data-index="11" data-title="Thank You For Everything" data-caption="The handshake, the hairband, and every shared smile."><div class="reveal-media" role="button" aria-label="Open photo 12: Thank You For Everything"><img src="./letter-12.jpg" alt="Aditi photo 12 - Thank You For Everything" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">12</span></div></div></article>
+      <article class="reveal-card" data-index="12" data-title="Memories Still Ahead" data-caption="Special memories made, and countless more waiting."><div class="reveal-media" role="button" aria-label="Open photo 13: Memories Still Ahead"><img src="./letter-13.jpg" alt="Aditi photo 13 - Memories Still Ahead" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">13</span></div></div></article>
+      <article class="reveal-card" data-index="13" data-title="Happy 14th Birthday" data-caption="Celebrating the amazing, irreplaceable person you are."><div class="reveal-media" role="button" aria-label="Open photo 14: Happy 14th Birthday"><img src="./letter-14.jpg" alt="Aditi photo 14 - Happy 14th Birthday" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">14</span></div></div></article>
+      <article class="reveal-card" data-index="14" data-title="Radiant & Genuine" data-caption="A candid moment of effortless charm."><div class="reveal-media" role="button" aria-label="Open photo 15: Radiant & Genuine"><img src="./letter-15.png" alt="Aditi photo 15 - Radiant & Genuine" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">15</span></div></div></article>
+      <article class="reveal-card" data-index="15" data-title="Pure Happiness" data-caption="That unmistakable smile that lights up any room."><div class="reveal-media" role="button" aria-label="Open photo 16: Pure Happiness"><img src="./letter-16.png" alt="Aditi photo 16 - Pure Happiness" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">16</span></div></div></article>
+      <article class="reveal-card" data-index="16" data-title="Gentle & True" data-caption="Quiet moments that speak volumes."><div class="reveal-media" role="button" aria-label="Open photo 17: Gentle & True"><img src="./letter-17.png" alt="Aditi photo 17 - Gentle & True" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">17</span></div></div></article>
+      <article class="reveal-card" data-index="17" data-title="Timeless Frame" data-caption="A memory etched forever in gold."><div class="reveal-media" role="button" aria-label="Open photo 18: Timeless Frame"><img src="./letter-18.jpg" alt="Aditi photo 18 - Timeless Frame" class="reveal-img" loading="lazy"><div class="reveal-front"><span class="reveal-number center-number">18</span></div></div></article>
+    </div>
+  </section>
+
+  <!-- Photo Lightbox Modal -->
+  <div id="photo-modal" class="photo-modal" aria-hidden="true" role="dialog" aria-label="Photo Lightbox">
+    <div class="photo-modal-backdrop" id="photo-modal-backdrop"></div>
+    <div class="photo-modal-container">
+      <button id="photo-modal-close" class="photo-modal-btn modal-close" type="button" aria-label="Close photo view">✕</button>
+      <button id="photo-modal-prev" class="photo-modal-btn modal-prev" type="button" aria-label="Previous photo">‹</button>
+      <button id="photo-modal-next" class="photo-modal-btn modal-next" type="button" aria-label="Next photo">›</button>
+      
+      <div class="photo-modal-figure">
+        <div class="photo-modal-img-wrap">
+          <img id="photo-modal-img" src="" alt="Enlarged memory photo">
+        </div>
+        <div class="photo-modal-caption-bar">
+          <div class="photo-modal-meta">
+            <span id="photo-modal-counter" class="photo-modal-counter">01 / 18</span>
+            <h4 id="photo-modal-title" class="photo-modal-title">The Beginning</h4>
+          </div>
+          <p id="photo-modal-desc" class="photo-modal-desc">April 2024 — where everything started.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="eyes-love-note">
+    <div class="eyes-note-glow"></div>
+
+    <div class="eyes-note-head">
+      <p class="eyes-note-kicker">one last reveal ✦</p>
+      <h2>A little closer</h2>
+      <p>Tap the card and let it turn.</p>
+    </div>
+
+    <div class="eyes-flip-wrap">
+      <div class="eyes-card">
+        <div class="eyes-card-inner">
+
+          <div class="eyes-front eyes-face">
+            <div class="eyes-front-no">19 / FINAL NOTE</div>
+            <h3>Open this</h3>
+            <p>A small piece of you I never want to forget.</p>
+            <button class="eyes-flip-btn" type="button" aria-label="Flip card to reveal eyes">
+              Reveal
+            </button>
+          </div>
+
+          <div class="eyes-back eyes-face">
+            <div class="eyes-img-wrap">
+              <img src="letter-19.png" alt="Her eyes" class="eyes-img" loading="lazy">
+            </div>
+
+            <div class="eyes-copy">
+              <div class="eyes-love-text">I Love You.</div>
+              <p class="eyes-love-subtext">
+                Loved you so hard that even talking to any other girl makes me feel like cheating on our memories. Ughhhhh idkkk why but im soooooo innnn loveee withh youu, idc if we arent in a relationship but you are my lovee of my lifee.
+              </p>
+              <button class="eyes-flip-btn back-btn" type="button" aria-label="Flip card back">
+                Back
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="extra-links-section">
+    <div class="extra-links-head">
+      <p class="extra-links-kicker">a few more things ✦</p>
+      <h2>Before you leave</h2>
+      <p>Three little boxes, three little pieces of us.</p>
+    </div>
+
+    <div class="extra-links-grid">
+      <article class="extra-card">
+        <p class="extra-card-no">01</p>
+        <h3>Voice Note</h3>
+        <p>
+          Tap below to hear the voice recording of you expressing your feelings of me.
+        </p>
+        <div class="voice-progress-wrap">
+          <div class="voice-progress-bar">
+            <div id="voice-progress-fill"></div>
+          </div>
+          <div class="voice-time-row">
+            <span id="voice-current-time">0:00</span>
+            <span id="voice-duration">0:00</span>
+          </div>
+        </div>
+        <button id="voice-card-btn" type="button" class="extra-card-btn">
+          Play Voice Note
+        </button>
+        <audio id="voice-card-audio" preload="metadata">
+          <source src="voice-note.mp3" type="audio/mpeg">
+        </audio>
+      </article>
+
+      <article class="extra-card">
+        <p class="extra-card-no">02</p>
+        <h3>Drive Folder</h3>
+        <p>
+          A small box of memories waiting here.
+        </p>
+        <a
+          href="https://drive.google.com/drive/folders/1SyFKRYnGVntjga1ZzrYVi_X8z3GHv306"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="extra-card-link"
+        >
+          Open Drive Folder
+        </a>
+      </article>
+
+      <article class="extra-card">
+        <p class="extra-card-no">03</p>
+        <h3>One More Link</h3>
+        <p>
+          One last place to open.
+        </p>
+        <a
+          href="https://justpaste.it/lsrq7"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="extra-card-link"
+        >
+          Open Link
+        </a>
+      </article>
+    </div>
+  </section>
+
+<section id="things-to-do-section">
+    <div class="things-to-do-glow"></div>
+
+    <div class="things-to-do-head">
+      <p class="things-to-do-kicker">locked little future ✦</p>
+      <h2>Things I wanna do with u</h2>
+      <p>This one opens only if you know the tiny code.</p>
+    </div>
+
+    <div class="things-lock-shell">
+      <div class="things-lock-card" id="things-lock-card">
+        <div class="things-lock-top">
+          <p class="things-lock-no">20 / LOCKED NOTE</p>
+          <div class="things-lock-icon">✦</div>
+        </div>
+
+        <h3>Something I kept in my mind for you</h3>
+        <p class="things-lock-text">
+          A few feelings, a few wishes, and a little future I keep imagining with you.
+        </p>
+
+        <form id="things-pin-form" class="things-pin-form">
+          <label for="things-pin" class="sr-only">Enter PIN</label>
+          <input
+            id="things-pin"
+            class="things-pin-input"
+            type="password"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="Enter PIN"
+            maxlength="6"
+            aria-label="Enter pin to unlock the section"
+          >
+          <button type="submit" class="things-pin-btn">Unlock</button>
+        </form>
+
+        <div class="things-hint-wrap">
+          <button type="button" id="things-hint-btn" class="things-hint-btn">Need a hint? ✦</button>
+          <p id="things-hint-text" class="things-hint-text hidden-hint">Hint: A special 6-digit code (992012)</p>
+        </div>
+
+        <p id="things-pin-msg" class="things-pin-msg" aria-live="polite"></p>
+      </div>
+
+      <div id="things-content" class="things-content things-hidden" aria-hidden="true">
+        <div class="things-content-inner">
+          <div class="things-content-copy">
+            <p class="things-content-kicker">unlocked ✦</p>
+            <h3>Things I wanna do with u</h3>
+          </div>
+
+          <div class="things-para-box">
+            <p>
+              I keep thinking about all the little things I want to do with you.
+              I want to ride a motorcycle with you sitting behind me as my pillion,
+              holding me tight while we go.
+            </p>
+
+            <p>
+              One thing I’ve always wanted is to hold your hand till eternity.
+              The day you gave me that handshake on sports day made me so happy,
+              and I still wish that moment could happen again, or maybe never end at all.
+            </p>
+
+            <p>
+              I want to hug you and say how much I loveeee youuuu.
+            </p>
+
+            <p>
+              I also want to take your brother out too, because how is it fair if I take only you out?
+              If I want you to be happy, I want him to be happy too.
+              I believe when we are together, maybe he can also be a reason for us to unite more.
+              Maybe one day I can take him on a ride when I get my own motorcycle.
+              And I want to play football with youu help you become a player I wanted to, yk how cool it will be us as a couple playing football together.
+            </p>
+
+            <p>
+              I’m sorry for letting you go on that day.
+              I really thought it wouldn’t be practical or possible for us to be together after school,
+              but you still didn’t let me go.
+              You held on and told me we could be together in the future.
+            </p>
+
+            <p>
+              I want to sit with you in class, or anywhere honestly.
+              I just want to sit with you and talk about something.
+              The last time I really sat with you was in 8th grade,
+              when you told me to sit with you because you saw me being alone.
+            </p>
+
+            <p>
+              I want to show myself as a good man, someone worthy in front of your parents.
+              Don’t judge me lol, but that’s really what I wish.
+              I want your parents to know about me too.
+              I also want to teach your brother football and maybe make him even better than me.
+            </p>
+
+            <p>
+              And I want some alone time with you where we talk about each other,
+              correct our mistakes, and never ever separate.
+              And the top secret of mine... My days Aditi what magic your parents did, idk but your soooooo gorgeous, pretty, and mesmerizing, the problem is that if I look at you, I can't stop looking at you, your soooooo attractive and your character, can't forget that it is just tooo gooooddd, I js can't resist brooo you are soooo pretty, im sooooo innn loveee withhh youu, ain't nobody loving you like I did, and I won't allow that your minee and will always be mineeee. Yessss, Im a very jealous guy, ill forever wish to be the guy you talk to in school, I want to be your first lovee andd your last lovee.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="hundred-reasons-section">
+    <div class="reasons-glow"></div>
+    <div class="reasons-head">
+      <p class="reasons-kicker">a hundred soft truths ✦</p>
+      <h2>100 Reasons Why I Love You</h2>
+      <p>A hundred little pieces of what you mean to me.</p>
+    </div>
+
+    <div class="reasons-shell">
+      <div class="reasons-controls">
+        <button type="button" class="reasons-tab active" data-range="all">All 100 ✦</button>
+        <button type="button" class="reasons-tab" data-range="1-25">1–25</button>
+        <button type="button" class="reasons-tab" data-range="26-50">26–50</button>
+        <button type="button" class="reasons-tab" data-range="51-75">51–75</button>
+        <button type="button" class="reasons-tab" data-range="76-100">76–100</button>
+      </div>
+
+      <ol class="reasons-list">
+        <li>I love the way your smile changes the whole mood of my day.</li>
+        <li>I love your eyes and the way they say things before your words do.</li>
+        <li>I love how your laugh feels like the nicest sound in the world.</li>
+        <li>I love the way you make ordinary moments feel special.</li>
+        <li>I love how kind you are without needing attention for it.</li>
+        <li>I love how soft your heart is.</li>
+        <li>I love how strong you are, even when you don’t realize it.</li>
+        <li>I love the way you care about the little things.</li>
+        <li>I love the way you remember details that matter.</li>
+        <li>I love how your presence makes everything feel calmer.</li>
+        <li>I love the way you say my name.</li>
+        <li>I love how safe I feel with you.</li>
+        <li>I love that talking to you never feels forced.</li>
+        <li>I love how even silence with you feels full.</li>
+        <li>I love the way you listen like what I say actually matters.</li>
+        <li>I love how you understand me in ways other people don’t.</li>
+        <li>I love how you make me feel seen.</li>
+        <li>I love how you make me feel chosen.</li>
+        <li>I love how you make me want to be a better person.</li>
+        <li>I love that you can make me smile without even trying.</li>
+        <li>I love the little faces you make.</li>
+        <li>I love how cute you are without even knowing it.</li>
+        <li>I love the way you get excited about things you love.</li>
+        <li>I love your random thoughts.</li>
+        <li>I love how comforting your voice is.</li>
+        <li>I love your sleepy side.</li>
+        <li>I love the way you look when you’re happy.</li>
+        <li>I love the way you look when you’re focused on something.</li>
+        <li>I love how beautiful you are without trying to be.</li>
+        <li>I love how your touch feels like reassurance.</li>
+        <li>I love how you make closeness feel easy.</li>
+        <li>I love how you can calm me down just by being there.</li>
+        <li>I love that you care when I’m not okay.</li>
+        <li>I love how patient you are with me.</li>
+        <li>I love how forgiving your heart is.</li>
+        <li>I love how you stay, even on difficult days.</li>
+        <li>I love that you don’t give up easily.</li>
+        <li>I love how honest you are.</li>
+        <li>I love the way you make me laugh at the worst times.</li>
+        <li>I love your sense of humor.</li>
+        <li>I love how your energy lingers even after you’re gone.</li>
+        <li>I love how talking to you can fix a bad day.</li>
+        <li>I love how you make life feel lighter.</li>
+        <li>I love how deeply you feel things.</li>
+        <li>I love how you love with your whole heart.</li>
+        <li>I love your softness.</li>
+        <li>I love your strength.</li>
+        <li>I love your gentleness.</li>
+        <li>I love how you can be both strong and tender at the same time.</li>
+        <li>I love that you make affection feel natural.</li>
+        <li>I love the way you check on me.</li>
+        <li>I love that you remember what matters to me.</li>
+        <li>I love how thoughtful you are.</li>
+        <li>I love the effort you put into the people you care about.</li>
+        <li>I love your loyalty.</li>
+        <li>I love that you feel like peace.</li>
+        <li>I love that you feel like home.</li>
+        <li>I love how naturally you fit into my heart.</li>
+        <li>I love how much meaning you carry in small moments.</li>
+        <li>I love how you can make one message mean a lot.</li>
+        <li>I love the way you care through actions, not just words.</li>
+        <li>I love how your love feels steady.</li>
+        <li>I love that I can be fully myself with you.</li>
+        <li>I love how comfortable you make everything feel.</li>
+        <li>I love how easy it is to miss you.</li>
+        <li>I love that even a small memory of you can make me smile.</li>
+        <li>I love the way you stay in my mind.</li>
+        <li>I love the way you stay in my heart.</li>
+        <li>I love that your happiness matters to me so much.</li>
+        <li>I love how you make love feel gentle instead of complicated.</li>
+        <li>I love how beautiful your soul is.</li>
+        <li>I love how genuine you are.</li>
+        <li>I love the way you make me feel lucky.</li>
+        <li>I love how much I admire you.</li>
+        <li>I love how much I respect you.</li>
+        <li>I love how much comfort I find in you.</li>
+        <li>I love that you make me believe in soft things again.</li>
+        <li>I love how easily you become the best part of my day.</li>
+        <li>I love how your existence alone means so much to me.</li>
+        <li>I love how one thought of you can change my whole mood.</li>
+        <li>I love how special you make connection feel.</li>
+        <li>I love that with you, nothing meaningful ever feels fake.</li>
+        <li>I love your little habits.</li>
+        <li>I love your little moods.</li>
+        <li>I love your little imperfections.</li>
+        <li>I love the parts of you that not everyone notices.</li>
+        <li>I love how real you are.</li>
+        <li>I love how deeply you matter to me.</li>
+        <li>I love how you make tenderness feel powerful.</li>
+        <li>I love how you make being cared for feel beautiful.</li>
+        <li>I love the way you still surprise me.</li>
+        <li>I love how your love feels quiet but strong.</li>
+        <li>I love how you make closeness feel safe.</li>
+        <li>I love how much of my heart already belongs to you.</li>
+        <li>I love that you feel rare.</li>
+        <li>I love that you feel unforgettable.</li>
+        <li>I love you for all the reasons I can explain and all the ones I can’t.</li>
+        <li>I love you because being with you feels like exactly where my heart wants to be.</li>
+        <li>I love how your presence can make even my worst days feel softer.</li>
+        <li>I love how, with you, even the smallest moments feel worth remembering.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="promises-section">
+    <div class="promises-glow"></div>
+    <div class="promises-head">
+      <p class="promises-kicker">kept in my heart ✦</p>
+      <h2>40 Promises I Want to Keep for Her</h2>
+      <p>Not just feelings, but the kind of love I want to live out.</p>
+    </div>
+
+    <div class="promises-shell">
+      <div class="promises-controls">
+        <button type="button" class="promises-tab active" data-range="all">All 40 ✦</button>
+        <button type="button" class="promises-tab" data-range="1-20">1–20</button>
+        <button type="button" class="promises-tab" data-range="21-40">21–40</button>
+      </div>
+
+      <ol class="promises-list">
+        <li>MARRY HER</li>
+        <li>Worship her forever</li>
+        <li>Never let her cry</li>
+        <li>Make her feel cherished</li>
+        <li>Take care of her more than myself</li>
+        <li>Protect her inner child at all cost</li>
+        <li>Give her the world</li>
+        <li>Dedicate my life to her</li>
+        <li>Never let her feel insecure</li>
+        <li>Listen to her</li>
+        <li>Be her support</li>
+        <li>Help her fulfill her dreams</li>
+        <li>Never let anyone disrespect her</li>
+        <li>Make sure she's always okay</li>
+        <li>Be her human diary</li>
+        <li>Let her inner child out</li>
+        <li>Make her feel romantic again</li>
+        <li>Let her know how love feels like</li>
+        <li>Be absolutely obsessed with her</li>
+        <li>Give her all of my heart</li>
+        <li>Make sure she doesn't have to feel embarrassed about me</li>
+        <li>Support her whenever one is against her</li>
+        <li>Be the definition of love for her</li>
+        <li>Bring her flowers all the time</li>
+        <li>Be able to provide her</li>
+        <li>Be cheesy in love</li>
+        <li>Be proud of her</li>
+        <li>Never let her sleep with a heavy heart</li>
+        <li>Always apologize to her</li>
+        <li>Give her the life she always dreamed of</li>
+        <li>Make sure no one even looks at her inappropriately</li>
+        <li>Help her when she's insecure about anything</li>
+        <li>Be an ideal example to our children</li>
+        <li>Adore her till last breath</li>
+        <li>Fulfill all her childhood dreams</li>
+        <li>Never let any other woman make her feel jealous or insecure</li>
+        <li>Yearn for her</li>
+        <li>Always be her warmth in cold</li>
+        <li>Love her till last breath</li>
+        <li>Never imagine a life without her</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="memory-archive">
+    <div class="archive-head">
+      <p class="archive-kicker">memory archive ✦</p>
+      <h2>Every letter, still glowing</h2>
+      <p>Tap a star to revisit a memory.</p>
+    </div>
+
+    <div id="constellation-map" class="heart-map">
+      <button class="star-node" data-target="0" style="left:50%; top:12%;">1</button>
+      <button class="star-node" data-target="1" style="left:35%; top:18%;">2</button>
+      <button class="star-node" data-target="2" style="left:65%; top:18%;">3</button>
+      <button class="star-node" data-target="3" style="left:24%; top:30%;">4</button>
+      <button class="star-node" data-target="4" style="left:76%; top:30%;">5</button>
+      <button class="star-node" data-target="5" style="left:20%; top:44%;">6</button>
+      <button class="star-node" data-target="6" style="left:80%; top:44%;">7</button>
+      <button class="star-node" data-target="7" style="left:28%; top:56%;">8</button>
+      <button class="star-node" data-target="8" style="left:72%; top:56%;">9</button>
+      <button class="star-node" data-target="9" style="left:38%; top:68%;">10</button>
+      <button class="star-node" data-target="10" style="left:62%; top:68%;">11</button>
+      <button class="star-node" data-target="11" style="left:45%; top:80%;">12</button>
+      <button class="star-node" data-target="12" style="left:55%; top:80%;">13</button>
+      <button class="star-node" data-target="13" style="left:50%; top:92%;">14</button>
+
+      <svg class="constellation-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M50 12 C44 12, 39 14, 35 18 C28 22, 25 26, 24 30 C21 36, 19 40, 20 44 C22 50, 25 54, 28 56 C33 62, 36 66, 38 68 C41 73, 43 77, 45 80 C47 86, 49 90, 50 92 C51 90, 53 86, 55 80 C57 77, 59 73, 62 68 C64 66, 67 62, 72 56 C75 54, 78 50, 80 44 C81 40, 79 36, 76 30 C75 26, 72 22, 65 18 C61 14, 56 12, 50 12" />
+      </svg>
+    </div>
+  </section>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
