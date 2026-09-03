@@ -10,8 +10,9 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || "992012").trim();
 
-// Ensure data folder exists
-const dataDir = path.join(__dirname, "data");
+// Ensure data folder exists (uses /tmp in serverless environments like Vercel)
+const isVercel = Boolean(process.env.VERCEL);
+const dataDir = isVercel ? "/tmp" : path.join(__dirname, "data");
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
@@ -362,7 +363,11 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.listen(PORT, () => {
-  console.log(`✨ Birthday Website & Secret Admin Backend running on http://localhost:${PORT}`);
-  console.log(`🔐 Secret Admin Dashboard available at http://localhost:${PORT}/admin`);
-});
+if (require.main === module || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`✨ Birthday Website & Secret Admin Backend running on http://localhost:${PORT}`);
+    console.log(`🔐 Secret Admin Dashboard available at http://localhost:${PORT}/admin`);
+  });
+}
+
+module.exports = app;
