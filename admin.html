@@ -450,6 +450,8 @@
       const metricQuestions = document.getElementById("metric-questions");
       const metricLetter = document.getElementById("metric-letter");
       const metricStars = document.getElementById("metric-stars");
+      const metricMoments = document.getElementById("metric-moments");
+      const metricUnsaid = document.getElementById("metric-unsaid");
 
       const tabs = document.querySelectorAll(".admin-tab");
       let activeTab = "all";
@@ -512,6 +514,7 @@
 
       loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
+        e.stopPropagation();
         authErr.textContent = "";
         const password = adminPass.value.trim();
         const submitBtn = document.getElementById("auth-submit-btn");
@@ -581,20 +584,18 @@
           })
           .then((data) => {
             dashboardData = data;
-            renderMetrics();
-            renderFeed();
+            try {
+              renderMetrics();
+              renderFeed();
+            } catch (renderErr) {
+              console.error("Dashboard render error:", renderErr);
+            }
           })
-          .catch(() => {
+          .catch((err) => {
+            console.error("loadDashboardData error:", err);
             showLogin();
           });
       }
-
-      const metricAnswered = document.getElementById("metric-answered");
-      const metricQuestions = document.getElementById("metric-questions");
-      const metricLetter = document.getElementById("metric-letter");
-      const metricStars = document.getElementById("metric-stars");
-      const metricMoments = document.getElementById("metric-moments");
-      const metricUnsaid = document.getElementById("metric-unsaid");
 
       function renderMetrics() {
         if (!dashboardData) return;
