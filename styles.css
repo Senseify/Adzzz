@@ -2695,15 +2695,16 @@ html, body {
   font-family: 'Cormorant Garamond', serif;
   font-size: clamp(1.25rem, 2.4vw, 1.55rem);
   line-height: 1.85;
-  color: rgba(240,238,232,0.95);
+  color: #f7df83;
   letter-spacing: 0.015em;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .thought-prose strong {
-  color: var(--gold-pale);
+  color: #fff1b0;
   font-weight: 600;
+  text-shadow: 0 0 14px rgba(247, 223, 131, 0.4);
 }
 
 .unsaid-closing-card {
