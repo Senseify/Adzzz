@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const starNodes = Array.from(document.querySelectorAll(".star-node"));
 
   const enhanceBtn = document.getElementById("enhance-btn");
-  const musicHint = document.getElementById("music-hint");
   const bgSong = document.getElementById("bg-song");
   const songPlayerSection = document.getElementById("song-player-section");
   const songPlayPause = document.getElementById("song-play-pause");
@@ -64,15 +63,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function dismissMusicHint() {
-    if (musicHint) {
-      musicHint.classList.add("dismissed");
-    }
-  }
-
   function playBackgroundSong() {
     if (!bgSong) return;
-    dismissMusicHint();
     bgSong.play().then(() => {
       musicStarted = true;
       if (songPlayerSection) songPlayerSection.classList.remove("hidden-player");
@@ -82,7 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function toggleBackgroundSong() {
     if (!bgSong) return;
-    dismissMusicHint();
     if (bgSong.paused) {
       pauseVoiceNote();
       bgSong.play().then(() => {

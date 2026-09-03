@@ -67,50 +67,6 @@ html, body {
   flex: 0 0 auto;
 }
 
-.music-hint {
-  position: fixed;
-  top: 1.35rem;
-  right: 14rem;
-  z-index: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 0.95rem;
-  border-radius: 999px;
-  border: 1px solid rgba(201,168,76,0.35);
-  background: rgba(12,14,30,0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: var(--gold-pale);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 16px rgba(201,168,76,0.18);
-  animation: musicHintPulse 2.8s ease-in-out infinite;
-  pointer-events: none;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.music-hint.dismissed {
-  opacity: 0;
-  transform: translateY(-8px);
-  pointer-events: none;
-}
-
-.music-hint-icon {
-  color: var(--gold);
-  font-size: 0.85rem;
-  animation: musicNoteBounce 1.8s ease-in-out infinite alternate;
-}
-
-@keyframes musicHintPulse {
-  0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 12px rgba(201,168,76,0.15); }
-  50% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 22px rgba(201,168,76,0.35); }
-}
-
-@keyframes musicNoteBounce {
-  from { transform: translateY(0); }
-  to { transform: translateY(-2px); }
-}
 
 #song-player-section {
   position: fixed;
@@ -1976,12 +1932,6 @@ html, body {
     display: none !important;
   }
 
-  .music-hint {
-    top: 4.1rem;
-    right: 0.85rem;
-    font-size: 0.62rem;
-    padding: 0.45rem 0.8rem;
-  }
 
   .photo-modal-container {
     width: 95vw;
