@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private Admin Dashboard — Aditi's Memories</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Admin specific styling integrated into theme */
+    .admin-body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at center, #0a0b1a 0%, #030305 100%);
+      color: var(--white);
+      padding: 2rem 1.5rem 5rem;
+    }
+
+    .admin-container {
+      width: min(1080px, 95vw);
+      margin: 0 auto;
+    }
+
+    /* Auth Card */
+    .admin-auth-shell {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .admin-auth-card {
+      width: min(440px, 92vw);
+      padding: 2.5rem 2rem;
+      border-radius: 28px;
+      border: 1px solid rgba(201,168,76,0.3);
+      background: linear-gradient(160deg, rgba(18,20,38,0.96) 0%, rgba(8,9,18,0.98) 100%);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 30px rgba(201,168,76,0.12);
+      text-align: center;
+    }
+
+    .admin-auth-card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      color: var(--gold-pale);
+      margin-bottom: 0.5rem;
+    }
+
+    .admin-auth-card p {
+      color: rgba(240,238,232,0.6);
+      font-size: 0.92rem;
+      margin-bottom: 2rem;
+    }
+
+    .admin-auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .admin-input {
+      width: 100%;
+      min-height: 52px;
+      border-radius: 999px;
+      border: 1px solid rgba(201,168,76,0.25);
+      background: rgba(255,255,255,0.04);
+      color: var(--white);
+      padding: 0 1.2rem;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .admin-input:focus {
+      border-color: var(--gold-pale);
+      background: rgba(255,255,255,0.07);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+
+    .admin-btn {
+      min-height: 50px;
+      padding: 0.85rem 1.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(201,168,76,0.35);
+      background: radial-gradient(circle at 35% 35%, rgba(243,223,155,0.25) 0%, rgba(201,168,76,0.15) 100%);
+      color: var(--gold-pale);
+      font-size: 0.8rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.25s ease;
+    }
+
+    .admin-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(243,223,155,0.65);
+      box-shadow: 0 0 20px rgba(201,168,76,0.2);
+    }
+
+    .admin-err {
+      color: rgba(255,130,130,0.9);
+      font-size: 0.82rem;
+      margin-top: 0.8rem;
+      min-height: 1.2rem;
+    }
+
+    /* Dashboard Main Header */
+    .admin-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 0 2.5rem;
+      border-bottom: 1px solid rgba(201,168,76,0.18);
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .admin-nav-title h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+      color: var(--white);
+      margin: 0;
+    }
+
+    .admin-nav-title p {
+      color: rgba(201,168,76,0.75);
+      font-size: 0.82rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-top: 0.3rem;
+    }
+
+    .admin-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .admin-ghost-btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid rgba(201,168,76,0.25);
+      background: rgba(255,255,255,0.03);
+      color: rgba(240,238,232,0.8);
+      font-size: 0.74rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .admin-ghost-btn:hover {
+      border-color: rgba(243,223,155,0.5);
+      color: var(--white);
+      background: rgba(201,168,76,0.1);
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .metric-card {
+      padding: 1.4rem;
+      border-radius: 20px;
+      border: 1px solid rgba(201,168,76,0.18);
+      background: linear-gradient(160deg, rgba(18,20,38,0.92) 0%, rgba(8,9,18,0.96) 100%);
+      box-shadow: 0 14px 35px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .metric-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.7);
+    }
+
+    .metric-val {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: var(--gold-pale);
+      line-height: 1.1;
+    }
+
+    /* Tabs */
+    .admin-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(201,168,76,0.14);
+      padding-bottom: 1.2rem;
+    }
+
+    .admin-tab {
+      padding: 0.65rem 1.4rem;
+      border-radius: 999px;
+      border: 1px solid rgba(201,168,76,0.22);
+      background: rgba(255,255,255,0.03);
+      color: rgba(240,238,232,0.7);
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .admin-tab:hover {
+      border-color: rgba(243,223,155,0.45);
+      color: var(--white);
+    }
+
+    .admin-tab.active {
+      border-color: var(--gold);
+      background: radial-gradient(circle at 35% 35%, rgba(243,223,155,0.25) 0%, rgba(201,168,76,0.16) 100%);
+      color: var(--gold-pale);
+      font-weight: 600;
+      box-shadow: 0 0 16px rgba(201,168,76,0.18);
+    }
+
+    /* Content Cards */
+    .dashboard-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .feed-card {
+      padding: 1.8rem;
+      border-radius: 22px;
+      border: 1px solid rgba(201,168,76,0.18);
+      background: linear-gradient(160deg, rgba(18,20,38,0.92) 0%, rgba(8,9,18,0.97) 100%);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.42);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      position: relative;
+    }
+
+    .feed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .feed-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold-pale);
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.25);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+    }
+
+    .feed-time {
+      font-size: 0.76rem;
+      color: rgba(240,238,232,0.45);
+    }
+
+    .feed-prompt {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem;
+      color: var(--white);
+      font-style: italic;
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .feed-content {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: rgba(243,223,155,0.95);
+      line-height: 1.7;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(201,168,76,0.12);
+      padding: 1.2rem 1.4rem;
+      border-radius: 16px;
+      white-space: pre-wrap;
+    }
+
+    .feed-reply-box {
+      margin-top: 0.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(201,168,76,0.12);
+    }
+
+    .feed-reply-box h4 {
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.8);
+      margin-bottom: 0.6rem;
+    }
+
+    .feed-reply-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: rgba(240,238,232,0.85);
+      line-height: 1.6;
+      background: rgba(124,106,255,0.08);
+      border: 1px solid rgba(124,106,255,0.22);
+      padding: 1rem 1.2rem;
+      border-radius: 14px;
+      white-space: pre-wrap;
+    }
+
+    .reply-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin-top: 0.6rem;
+    }
+
+    .reply-textarea {
+      width: 100%;
+      min-height: 90px;
+      padding: 0.9rem 1.1rem;
+      border-radius: 16px;
+      border: 1px solid rgba(201,168,76,0.2);
+      background: rgba(255,255,255,0.03);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+    }
+
+    .reply-textarea:focus {
+      border-color: var(--gold-pale);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: rgba(240,238,232,0.5);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .admin-nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body class="admin-body">
+
+  <div id="auth-view" class="admin-auth-shell">
+    <div class="admin-auth-card">
+      <h2>Secret Admin</h2>
+      <p>Enter passkey to open Aditi's responses & letter.</p>
+      <form id="login-form" class="admin-auth-form">
+        <input id="admin-pass" type="password" class="admin-input" placeholder="Enter passkey" required autocomplete="current-password">
+        <button type="submit" class="admin-btn">Authenticate</button>
+      </form>
+      <div id="auth-err" class="admin-err"></div>
+    </div>
+  </div>
+
+  <div id="dashboard-view" class="admin-container" style="display: none;">
+    <header class="admin-nav">
+      <div class="admin-nav-title">
+        <h1>Private Dashboard</h1>
+        <p>Her Answers, Questions & Future Letter</p>
+      </div>
+      <div class="admin-nav-actions">
+        <a href="/" class="admin-ghost-btn">← Back to Site</a>
+        <button id="logout-btn" class="admin-ghost-btn" type="button">Log Out</button>
+      </div>
+    </header>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-label">Questions Answered</span>
+        <span id="metric-answered" class="metric-val">0 / 6</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Questions From Her</span>
+        <span id="metric-questions" class="metric-val">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Future Letter</span>
+        <span id="metric-letter" class="metric-val">No</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Stars Message</span>
+        <span id="metric-stars" class="metric-val">No</span>
+      </div>
+    </div>
+
+    <nav class="admin-tabs">
+      <button class="admin-tab active" data-tab="all" type="button">All Activity</button>
+      <button class="admin-tab" data-tab="answers" type="button">Her Answers</button>
+      <button class="admin-tab" data-tab="questions" type="button">Her Questions</button>
+      <button class="admin-tab" data-tab="letter" type="button">Future Letter</button>
+    </nav>
+
+    <main id="feed-container" class="dashboard-feed">
+      <!-- Injected by JavaScript -->
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const authView = document.getElementById("auth-view");
+      const dashboardView = document.getElementById("dashboard-view");
+      const loginForm = document.getElementById("login-form");
+      const adminPass = document.getElementById("admin-pass");
+      const authErr = document.getElementById("auth-err");
+      const logoutBtn = document.getElementById("logout-btn");
+      const feedContainer = document.getElementById("feed-container");
+
+      const metricAnswered = document.getElementById("metric-answered");
+      const metricQuestions = document.getElementById("metric-questions");
+      const metricLetter = document.getElementById("metric-letter");
+      const metricStars = document.getElementById("metric-stars");
+
+      const tabs = document.querySelectorAll(".admin-tab");
+      let activeTab = "all";
+      let dashboardData = null;
+
+      function formatTimestamp(isoStr) {
+        if (!isoStr) return "";
+        try {
+          const d = new Date(isoStr);
+          return d.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true
+          });
+        } catch {
+          return isoStr;
+        }
+      }
+
+      function checkAuth() {
+        fetch("/api/admin/check-auth")
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.authenticated) {
+              showDashboard();
+            } else {
+              showLogin();
+            }
+          })
+          .catch(() => showLogin());
+      }
+
+      function showLogin() {
+        authView.style.display = "flex";
+        dashboardView.style.display = "none";
+      }
+
+      function showDashboard() {
+        authView.style.display = "none";
+        dashboardView.style.display = "block";
+        loadDashboardData();
+      }
+
+      loginForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        authErr.textContent = "";
+        const password = adminPass.value;
+
+        fetch("/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password })
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.success) {
+              adminPass.value = "";
+              showDashboard();
+            } else {
+              authErr.textContent = res.message || "Invalid passkey.";
+            }
+          })
+          .catch(() => {
+            authErr.textContent = "Network error. Try again.";
+          });
+      });
+
+      logoutBtn.addEventListener("click", () => {
+        fetch("/api/admin/logout", { method: "POST" })
+          .then(() => showLogin())
+          .catch(() => showLogin());
+      });
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          tabs.forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          activeTab = tab.dataset.tab;
+          renderFeed();
+        });
+      });
+
+      function loadDashboardData() {
+        fetch("/api/admin/data")
+          .then((r) => {
+            if (!r.ok) throw new Error("Unauthorized");
+            return r.json();
+          })
+          .then((data) => {
+            dashboardData = data;
+            renderMetrics();
+            renderFeed();
+          })
+          .catch(() => {
+            showLogin();
+          });
+      }
+
+      function renderMetrics() {
+        if (!dashboardData) return;
+        const { stats } = dashboardData;
+        metricAnswered.textContent = `${stats.questionsAnswered} / 6`;
+        metricQuestions.textContent = stats.questionsAskedCount;
+        metricLetter.textContent = stats.hasFutureLetter ? "Yes ❤️" : "No";
+        metricStars.textContent = stats.starsCompleted ? "Yes ⭐" : "No";
+      }
+
+      function renderFeed() {
+        if (!dashboardData) return;
+        feedContainer.innerHTML = "";
+
+        const { answers, questions, futureLetter } = dashboardData;
+        const items = [];
+
+        if (activeTab === "all" || activeTab === "answers") {
+          answers.forEach((ans) => {
+            items.push({
+              type: "answer",
+              date: new Date(ans.created_at),
+              html: `
+                <article class="feed-card">
+                  <div class="feed-header">
+                    <span class="feed-badge">Her Answer — Question ${ans.question_id}</span>
+                    <span class="feed-time">${formatTimestamp(ans.created_at)}</span>
+                  </div>
+                  <h3 class="feed-prompt">${ans.question_text}</h3>
+                  <div class="feed-content">${escapeHTML(ans.answer_text)}</div>
+                </article>
+              `
+            });
+          });
+        }
+
+        if (activeTab === "all" || activeTab === "questions") {
+          questions.forEach((q) => {
+            const hasReply = Boolean(q.admin_reply);
+            items.push({
+              type: "question",
+              date: new Date(q.created_at),
+              html: `
+                <article class="feed-card" id="q-card-${q.id}">
+                  <div class="feed-header">
+                    <span class="feed-badge">Question From Her ${hasReply ? "✦ Replied" : "✦ Pending"}</span>
+                    <span class="feed-time">${formatTimestamp(q.created_at)}</span>
+                  </div>
+                  <h3 class="feed-prompt">"${escapeHTML(q.question_text)}"</h3>
+                  
+                  ${hasReply ? `
+                    <div class="feed-reply-box">
+                      <h4>Your Reply (${formatTimestamp(q.replied_at)})</h4>
+                      <div class="feed-reply-text">${escapeHTML(q.admin_reply)}</div>
+                    </div>
+                  ` : `
+                    <div class="feed-reply-box">
+                      <h4>Write Your Answer:</h4>
+                      <form class="reply-form" data-qid="${q.id}">
+                        <textarea class="reply-textarea" placeholder="Type your answer to her question..." required></textarea>
+                        <button type="submit" class="admin-btn" style="align-self: flex-start;">Send Reply</button>
+                      </form>
+                    </div>
+                  `}
+                </article>
+              `
+            });
+          });
+        }
+
+        if ((activeTab === "all" || activeTab === "letter") && futureLetter) {
+          items.push({
+            type: "letter",
+            date: new Date(futureLetter.created_at),
+            html: `
+              <article class="feed-card">
+                <div class="feed-header">
+                  <span class="feed-badge" style="background: rgba(215,122,168,0.18); border-color: rgba(215,122,168,0.4);">A Letter For The Future 💌</span>
+                  <span class="feed-time">${formatTimestamp(futureLetter.created_at)}</span>
+                </div>
+                <h3 class="feed-prompt">Her Sealed Words for Tomorrow:</h3>
+                <div class="feed-content" style="border-color: rgba(215,122,168,0.25); color: #fff;">${escapeHTML(futureLetter.letter_text)}</div>
+              </article>
+            `
+          });
+        }
+
+        if (items.length === 0) {
+          feedContainer.innerHTML = `<div class="empty-state">No submissions recorded yet for this view.</div>`;
+          return;
+        }
+
+        // Sort items by date descending
+        items.sort((a, b) => b.date - a.date);
+        feedContainer.innerHTML = items.map((i) => i.html).join("");
+
+        // Attach event listeners for reply forms
+        document.querySelectorAll(".reply-form").forEach((form) => {
+          form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const qid = form.dataset.qid;
+            const textarea = form.querySelector(".reply-textarea");
+            const replyText = textarea.value.trim();
+            if (!replyText) return;
+
+            fetch("/api/admin/reply", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ questionId: qid, replyText })
+            })
+              .then((r) => r.json())
+              .then((res) => {
+                if (res.success) {
+                  loadDashboardData();
+                } else {
+                  alert(res.message || "Failed to save reply.");
+                }
+              })
+              .catch(() => alert("Network error."));
+          });
+        });
+      }
+
+      function escapeHTML(str) {
+        if (!str) return "";
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      checkAuth();
+    });
+  </script>
+</body>
+</html>

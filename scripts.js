@@ -409,10 +409,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Section Entrance Stagger Animations
   gsap.utils
-    .toArray("#final-note, #aditi-photo-reveal, #eyes-love-note, #extra-links-section, #things-to-do-section, #hundred-reasons-section, #promises-section, #memory-archive")
+    .toArray("#final-note, #aditi-photo-reveal, #eyes-love-note, #since-it-started, #extra-links-section, #questions-for-her, #questions-for-him, #future-letter-section, #things-to-do-section, #stars-message-section, #hundred-reasons-section, #promises-section, #memory-archive")
     .forEach((section) => {
       const items = section.querySelectorAll(
-        "h2, p, .photo-reveal-grid, .eyes-card, .extra-links-grid, .things-lock-card, .things-content, .reasons-controls, .reasons-shell, .promises-controls, .promises-shell, #constellation-map"
+        "h2, p, .photo-reveal-grid, .eyes-card, .since-started-shell, .extra-links-grid, .ask-grid, .ask-him-shell, .future-parchment-card, .things-lock-card, .things-content, .stars-sky-dome, .reasons-controls, .reasons-shell, .promises-controls, .promises-shell, #constellation-map"
       );
       if (!items.length) return;
 
@@ -495,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (photoModalCounter) {
-      photoModalCounter.textContent = `${String(currentPhotoIndex + 1).padStart(2, "0")} / ${String(revealCards.length).padStart(2, "0")}`;
+      photoModalCounter.textContent = `MOMENT ${String(currentPhotoIndex + 1).padStart(2, "0")} / ${String(revealCards.length).padStart(2, "0")}`;
     }
 
     if (photoModalTitle) {
@@ -633,6 +633,295 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       ScrollTrigger.refresh();
+    });
+  });
+
+  // =======================================================================
+  // SINCE IT STARTED: LIVE DYNAMIC COUNTER (Start: April 7, 2024, 00:00:00)
+  // =======================================================================
+  const START_DATE = new Date(2024, 3, 7, 0, 0, 0); // Month 3 = April
+  const daysCountEl = document.getElementById("days-count");
+  const detailedYearsEl = document.getElementById("detailed-years");
+  const detailedMonthsEl = document.getElementById("detailed-months");
+  const detailedDaysEl = document.getElementById("detailed-days");
+  const detailedHoursEl = document.getElementById("detailed-hours");
+  const detailedMinutesEl = document.getElementById("detailed-minutes");
+  const detailedSecondsEl = document.getElementById("detailed-seconds");
+
+  const counterModeDaysBtn = document.getElementById("counter-mode-days");
+  const counterModeDetailedBtn = document.getElementById("counter-mode-detailed");
+  const counterViewDays = document.getElementById("counter-view-days");
+  const counterViewDetailed = document.getElementById("counter-view-detailed");
+
+  function getDetailedCalendarDifference(startDate, endDate) {
+    let years = endDate.getFullYear() - startDate.getFullYear();
+    let months = endDate.getMonth() - startDate.getMonth();
+    let days = endDate.getDate() - startDate.getDate();
+    let hours = endDate.getHours() - startDate.getHours();
+    let minutes = endDate.getMinutes() - startDate.getMinutes();
+    let seconds = endDate.getSeconds() - startDate.getSeconds();
+
+    if (seconds < 0) {
+      seconds += 60;
+      minutes -= 1;
+    }
+    if (minutes < 0) {
+      minutes += 60;
+      hours -= 1;
+    }
+    if (hours < 0) {
+      hours += 24;
+      days -= 1;
+    }
+    if (days < 0) {
+      const prevMonthLastDay = new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate();
+      days += prevMonthLastDay;
+      months -= 1;
+    }
+    if (months < 0) {
+      months += 12;
+      years -= 1;
+    }
+
+    return { years, months, days, hours, minutes, seconds };
+  }
+
+  function updateLiveCounter() {
+    const now = new Date();
+    const totalMs = Math.max(0, now - START_DATE);
+    const totalDays = Math.floor(totalMs / (1000 * 60 * 60 * 24));
+
+    if (daysCountEl) {
+      daysCountEl.textContent = totalDays.toLocaleString();
+    }
+
+    const diff = getDetailedCalendarDifference(START_DATE, now);
+    if (detailedYearsEl) detailedYearsEl.textContent = diff.years;
+    if (detailedMonthsEl) detailedMonthsEl.textContent = diff.months;
+    if (detailedDaysEl) detailedDaysEl.textContent = diff.days;
+    if (detailedHoursEl) detailedHoursEl.textContent = String(diff.hours).padStart(2, "0");
+    if (detailedMinutesEl) detailedMinutesEl.textContent = String(diff.minutes).padStart(2, "0");
+    if (detailedSecondsEl) detailedSecondsEl.textContent = String(diff.seconds).padStart(2, "0");
+  }
+
+  if (counterModeDaysBtn && counterModeDetailedBtn && counterViewDays && counterViewDetailed) {
+    counterModeDaysBtn.addEventListener("click", () => {
+      counterModeDaysBtn.classList.add("active");
+      counterModeDetailedBtn.classList.remove("active");
+      counterViewDays.style.display = "block";
+      counterViewDetailed.style.display = "none";
+    });
+
+    counterModeDetailedBtn.addEventListener("click", () => {
+      counterModeDetailedBtn.classList.add("active");
+      counterModeDaysBtn.classList.remove("active");
+      counterViewDays.style.display = "none";
+      counterViewDetailed.style.display = "block";
+    });
+
+    updateLiveCounter();
+    setInterval(updateLiveCounter, 1000);
+  }
+
+  // =======================================================================
+  // 6 QUESTIONS: SUBMIT ANSWERS
+  // =======================================================================
+  const askForms = document.querySelectorAll(".ask-form");
+  askForms.forEach((form) => {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const qid = form.dataset.qid;
+      const card = form.closest(".ask-card");
+      const questionTextEl = card ? card.querySelector(".ask-question-text") : null;
+      const questionText = questionTextEl ? questionTextEl.textContent.trim() : `Question ${qid}`;
+      const textarea = form.querySelector(".ask-textarea");
+      const submitBtn = form.querySelector(".ask-submit-btn");
+      const feedbackEl = form.querySelector(".ask-feedback-msg");
+      const statusPill = card ? card.querySelector(".ask-status-pill") : null;
+
+      const answerText = textarea ? textarea.value.trim() : "";
+      if (!answerText) return;
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Saving...";
+      }
+
+      fetch("/api/answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionId: qid, questionText, answerText })
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          if (res.success) {
+            if (feedbackEl) {
+              feedbackEl.textContent = "Answer saved ❤️";
+              feedbackEl.style.opacity = "1";
+              setTimeout(() => {
+                feedbackEl.style.opacity = "0";
+              }, 4000);
+            }
+            if (statusPill) {
+              statusPill.textContent = "Saved ❤️";
+              statusPill.classList.add("saved");
+            }
+          } else {
+            if (feedbackEl) feedbackEl.textContent = "Couldn't save. Try again.";
+          }
+        })
+        .catch(() => {
+          if (feedbackEl) feedbackEl.textContent = "Network error. Try again.";
+        })
+        .finally(() => {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send Answer";
+          }
+        });
+    });
+  });
+
+  // =======================================================================
+  // THINGS YOU WANT TO ASK ME
+  // =======================================================================
+  const askHimForm = document.getElementById("ask-him-form");
+  const askHimTextarea = document.getElementById("ask-him-textarea");
+  const askHimSubmitBtn = document.getElementById("ask-him-submit-btn");
+  const askHimFeedback = document.getElementById("ask-him-feedback");
+
+  if (askHimForm && askHimTextarea) {
+    askHimForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const questionText = askHimTextarea.value.trim();
+      if (!questionText) return;
+
+      if (askHimSubmitBtn) {
+        askHimSubmitBtn.disabled = true;
+        askHimSubmitBtn.textContent = "Sending...";
+      }
+
+      fetch("/api/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionText })
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          if (res.success) {
+            askHimTextarea.value = "";
+            if (askHimFeedback) {
+              askHimFeedback.textContent = "Question sent ❤️ I'll read it soon.";
+              setTimeout(() => {
+                askHimFeedback.textContent = "";
+              }, 5000);
+            }
+          } else {
+            if (askHimFeedback) askHimFeedback.textContent = "Couldn't send. Try again.";
+          }
+        })
+        .catch(() => {
+          if (askHimFeedback) askHimFeedback.textContent = "Network error. Try again.";
+        })
+        .finally(() => {
+          if (askHimSubmitBtn) {
+            askHimSubmitBtn.disabled = false;
+            askHimSubmitBtn.textContent = "Send Question";
+          }
+        });
+    });
+  }
+
+  // =======================================================================
+  // A LETTER FOR THE FUTURE
+  // =======================================================================
+  const futureLetterForm = document.getElementById("future-letter-form");
+  const futureLetterInput = document.getElementById("future-letter-input");
+  const futureSealBtn = document.getElementById("future-seal-btn");
+  const futureLetterFeedback = document.getElementById("future-letter-feedback");
+  const waxSealOverlay = document.getElementById("wax-seal-overlay");
+
+  if (futureLetterForm && futureLetterInput) {
+    futureLetterForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const letterText = futureLetterInput.value.trim();
+      if (!letterText) return;
+
+      if (futureSealBtn) {
+        futureSealBtn.disabled = true;
+        futureSealBtn.textContent = "Sealing...";
+      }
+
+      fetch("/api/letter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ letterText })
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          if (res.success) {
+            if (waxSealOverlay) {
+              waxSealOverlay.style.display = "flex";
+            }
+          } else {
+            if (futureLetterFeedback) futureLetterFeedback.textContent = "Couldn't seal letter.";
+          }
+        })
+        .catch(() => {
+          if (futureLetterFeedback) futureLetterFeedback.textContent = "Network error.";
+        })
+        .finally(() => {
+          if (futureSealBtn) {
+            futureSealBtn.disabled = false;
+            futureSealBtn.textContent = "Seal This Letter";
+          }
+        });
+    });
+  }
+
+  // =======================================================================
+  // MESSAGE IN THE STARS
+  // =======================================================================
+  const msgStars = document.querySelectorAll(".msg-star");
+  const starsCompleteBanner = document.getElementById("stars-complete-banner");
+
+  let revealedStarIndices = new Set();
+  const totalMessageStars = msgStars.length;
+
+  msgStars.forEach((star) => {
+    star.addEventListener("click", () => {
+      const idx = Number(star.dataset.index);
+      const word = star.dataset.word;
+      if (isNaN(idx) || !word) return;
+
+      star.classList.add("revealed");
+      revealedStarIndices.add(idx);
+
+      const slot = document.querySelector(`.tray-slot[data-index="${idx}"]`);
+      if (slot) {
+        slot.textContent = word;
+        slot.classList.add("filled");
+      }
+
+      if (revealedStarIndices.size === totalMessageStars && totalMessageStars > 0) {
+        if (starsCompleteBanner && starsCompleteBanner.style.display !== "block") {
+          starsCompleteBanner.style.display = "block";
+          gsap.fromTo(
+            starsCompleteBanner,
+            { opacity: 0, scale: 0.92, y: 18 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.9, ease: "power3.out" }
+          );
+        }
+
+        fetch("/api/stars-progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            completed: true,
+            message: "In every universe, in every lifetime, I would still choose you."
+          })
+        }).catch(() => {});
+      }
     });
   });
 
