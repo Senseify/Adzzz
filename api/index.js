@@ -5,8 +5,15 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 const { DatabaseSync } = require("node:sqlite");
+const { Pool } = require("pg");
 
 const app = express();
+const answerPool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 5,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000
+});
 const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || "992012").trim();
 
 // Ensure data folder exists (uses /tmp on Vercel Serverless)
@@ -22,15 +29,6 @@ const db = new DatabaseSync(dbPath);
 
 // Initialize database schema
 db.exec(`
-  CREATE TABLE IF NOT EXISTS answers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    question_id INTEGER NOT NULL,
-    question_text TEXT NOT NULL,
-    answer_text TEXT NOT NULL,
-    status TEXT DEFAULT 'unread',
-    created_at TEXT NOT NULL
-  );
-
   CREATE TABLE IF NOT EXISTS questions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     question_text TEXT NOT NULL,
@@ -56,10 +54,28 @@ db.exec(`
 `);
 
 // Prepared Statements for efficiency & security
-const insertAnswerStmt = db.prepare(`
-  INSERT INTO answers (question_id, question_text, answer_text, created_at)
-  VALUES (?, ?, ?, ?)
-`);
+// Answer submissions use Neon so they survive serverless instance churn and redeploys.
+async function saveAnswer({ questionId, questionText, answerText }) {
+  const submissionId = crypto.randomUUID();
+  const result = await answerPool.query(
+    `INSERT INTO answer_submissions
+      (submission_id, question_id, question_text, answer_text, submitted_at)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING submission_id, question_id, question_text, answer_text, status, submitted_at`,
+    [submissionId, questionId, questionText, answerText, new Date().toISOString()]
+  );
+  return result.rows[0];
+}
+
+async function getAllAnswers() {
+  const result = await answerPool.query(
+    `SELECT submission_id, question_id, question_text, answer_text, status,
+            submitted_at
+     FROM answer_submissions
+     ORDER BY submitted_at DESC, submission_id DESC`
+  );
+  return result.rows;
+}
 
 const insertQuestionStmt = db.prepare(`
   INSERT INTO questions (question_text, created_at)
@@ -78,12 +94,6 @@ const upsertInteractionStmt = db.prepare(`
     data = excluded.data,
     completed = excluded.completed,
     updated_at = excluded.updated_at
-`);
-
-const getAllAnswersStmt = db.prepare(`
-  SELECT id, question_id, question_text, answer_text, status, created_at
-  FROM answers
-  ORDER BY id DESC
 `);
 
 const getAllQuestionsStmt = db.prepare(`
@@ -107,12 +117,6 @@ const getAllInteractionsStmt = db.prepare(`
 const replyQuestionStmt = db.prepare(`
   UPDATE questions
   SET admin_reply = ?, status = 'replied', replied_at = ?
-  WHERE id = ?
-`);
-
-const updateAnswerStatusStmt = db.prepare(`
-  UPDATE answers
-  SET status = ?
   WHERE id = ?
 `);
 
@@ -182,20 +186,27 @@ function requireAdmin(req, res, next) {
 // =======================================================================
 
 // 1. Submit answer to one of the 6 questions
-app.post("/api/answers", (req, res) => {
+app.post("/api/answers", async (req, res) => {
   try {
     const { questionId, questionText, answerText } = req.body;
-    if (!questionId || !questionText || !answerText || !answerText.trim()) {
-      return res.status(400).json({ success: false, message: "All fields are required." });
+    const normalizedQuestionId = Number(questionId);
+    const normalizedQuestionText = String(questionText || "").trim();
+    const normalizedAnswerText = String(answerText || "").trim();
+
+    if (!Number.isInteger(normalizedQuestionId) || normalizedQuestionId < 1 || !normalizedQuestionText || !normalizedAnswerText) {
+      return res.status(400).json({ success: false, message: "A valid question and answer are required." });
     }
 
-    const now = new Date().toISOString();
-    insertAnswerStmt.run(Number(questionId), questionText.trim(), answerText.trim(), now);
+    const submission = await saveAnswer({
+      questionId: normalizedQuestionId,
+      questionText: normalizedQuestionText,
+      answerText: normalizedAnswerText
+    });
 
-    return res.json({ success: true, message: "Answer saved ❤️" });
+    return res.status(201).json({ success: true, message: "Answer saved.", submission });
   } catch (err) {
-    console.error("Error saving answer:", err);
-    return res.status(500).json({ success: false, message: "Failed to save answer." });
+    console.error("Error saving answer to Neon:", err);
+    return res.status(503).json({ success: false, message: "Your answer could not be saved. Please try again." });
   }
 });
 
@@ -309,9 +320,9 @@ app.get("/api/admin/check-auth", (req, res) => {
 // PROTECTED ADMIN ENDPOINTS
 // =======================================================================
 
-app.get("/api/admin/data", requireAdmin, (req, res) => {
+app.get("/api/admin/data", requireAdmin, async (req, res) => {
   try {
-    const answers = getAllAnswersStmt.all();
+    const answers = await getAllAnswers();
     const questions = getAllQuestionsStmt.all();
     const futureLetter = getLatestLetterStmt.all()[0] || null;
     const interactions = getAllInteractionsStmt.all();
