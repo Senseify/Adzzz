@@ -619,15 +619,16 @@
           answers.forEach((ans) => {
             items.push({
               type: "answer",
-              date: new Date(ans.created_at),
+              date: new Date(ans.submitted_at),
               html: `
                 <article class="feed-card">
                   <div class="feed-header">
                     <span class="feed-badge">Her Answer — Question ${ans.question_id}</span>
-                    <span class="feed-time">${formatTimestamp(ans.created_at)}</span>
+                    <span class="feed-time">${formatTimestamp(ans.submitted_at)}</span>
                   </div>
-                  <h3 class="feed-prompt">${ans.question_text}</h3>
+                  <h3 class="feed-prompt">${escapeHTML(ans.question_text)}</h3>
                   <div class="feed-content">${escapeHTML(ans.answer_text)}</div>
+                  <div class="feed-time">Submission ID: ${escapeHTML(ans.submission_id)}</div>
                 </article>
               `
             });

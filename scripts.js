@@ -763,7 +763,11 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questionId: qid, questionText, answerText })
       })
-        .then((r) => r.json())
+        .then(async (r) => {
+          const res = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(res.message || "The answer could not be saved.");
+          return res;
+        })
         .then((res) => {
           if (res.success) {
             if (feedbackEl) {
