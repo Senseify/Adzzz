@@ -441,19 +441,7 @@
 </head>
 <body class="admin-body">
 
-  <div id="auth-view" class="admin-auth-shell">
-    <div class="admin-auth-card">
-      <h2>Secret Admin</h2>
-      <p>Enter passkey to open Aditi's responses & letter.</p>
-      <form id="login-form" class="admin-auth-form">
-        <input id="admin-pass" type="password" class="admin-input" placeholder="Enter passkey (992012)" required autocomplete="current-password" autofocus>
-        <button id="auth-submit-btn" type="submit" class="admin-btn">Authenticate</button>
-      </form>
-      <div id="auth-err" class="admin-err"></div>
-    </div>
-  </div>
-
-  <div id="dashboard-view" class="admin-container" style="display: none;">
+  <div id="dashboard-view" class="admin-container">
     <header class="admin-nav">
       <div class="admin-nav-title">
         <h1>Private Dashboard</h1>
@@ -461,7 +449,6 @@
       </div>
       <div class="admin-nav-actions">
         <a href="/" class="admin-ghost-btn">← Back to Site</a>
-        <button id="logout-btn" class="admin-ghost-btn" type="button">Log Out</button>
       </div>
     </header>
 
@@ -512,12 +499,7 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const authView = document.getElementById("auth-view");
       const dashboardView = document.getElementById("dashboard-view");
-      const loginForm = document.getElementById("login-form");
-      const adminPass = document.getElementById("admin-pass");
-      const authErr = document.getElementById("auth-err");
-      const logoutBtn = document.getElementById("logout-btn");
       const feedContainer = document.getElementById("feed-container");
       const dashboardStatus = document.getElementById("dashboard-status");
       const answerSearch = document.getElementById("answer-search");
@@ -537,12 +519,7 @@
       const API_BASE = window.location.protocol.startsWith("http") ? "" : "http://localhost:8080";
 
       function getAuthHeaders(extraHeaders = {}) {
-        const token = localStorage.getItem("admin_session_token");
-        const headers = { ...extraHeaders };
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-        return headers;
+        return { ...extraHeaders };
       }
 
       function formatTimestamp(isoStr) {
@@ -562,84 +539,10 @@
         }
       }
 
-      function checkAuth() {
-        fetch(`${API_BASE}/api/admin/check-auth`, {
-          credentials: "include",
-          headers: getAuthHeaders()
-        })
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.authenticated) {
-              showDashboard();
-            } else {
-              showLogin();
-            }
-          })
-          .catch(() => showLogin());
-      }
-
-      function showLogin() {
-        authView.style.display = "flex";
-        dashboardView.style.display = "none";
-      }
-
       function showDashboard() {
-        authView.style.display = "none";
         dashboardView.style.display = "block";
         loadDashboardData();
       }
-
-      loginForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        authErr.textContent = "";
-        const password = adminPass.value.trim();
-        const submitBtn = document.getElementById("auth-submit-btn");
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Verifying...";
-        }
-
-        fetch(`${API_BASE}/api/admin/login`, {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password })
-        })
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.success) {
-              if (res.token) {
-                localStorage.setItem("admin_session_token", res.token);
-              }
-              adminPass.value = "";
-              showDashboard();
-            } else {
-              authErr.textContent = res.message || "Invalid passkey.";
-            }
-          })
-          .catch((err) => {
-            console.error("Login fetch error:", err);
-            authErr.textContent = "Cannot connect to server. Ensure server is running on port 8080.";
-          })
-          .finally(() => {
-            if (submitBtn) {
-              submitBtn.disabled = false;
-              submitBtn.textContent = "Authenticate";
-            }
-          });
-      });
-
-      logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("admin_session_token");
-        fetch(`${API_BASE}/api/admin/logout`, {
-          method: "POST",
-          credentials: "include",
-          headers: getAuthHeaders()
-        })
-          .then(() => showLogin())
-          .catch(() => showLogin());
-      });
 
       tabs.forEach((tab) => {
         tab.addEventListener("click", () => {
@@ -694,8 +597,7 @@
             console.error("loadDashboardData error:", err);
             if (dashboardStatus) dashboardStatus.textContent = "Could not load saved answers. Check the connection and refresh.";
             feedContainer.innerHTML = `<div class="empty-state">We could not reach the answer database.</div>`;
-            if (err.message === "Unauthorized") showLogin();
-          });
+              });
       }
 
       function renderMetrics() {
@@ -870,7 +772,7 @@
           .replace(/'/g, "&#039;");
       }
 
-      checkAuth();
+      showDashboard();
     });
   </script>
 </body>
