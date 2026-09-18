@@ -363,6 +363,35 @@
       font-size: 0.85rem;
     }
 
+    .inbox-tools {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+      margin: -0.5rem 0 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    .inbox-search {
+      flex: 1 1 260px;
+      min-height: 46px;
+      border-radius: 999px;
+      border: 1px solid rgba(201,168,76,0.25);
+      background: rgba(255,255,255,0.04);
+      color: var(--white);
+      padding: 0 1rem;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .inbox-search:focus {
+      border-color: var(--gold-pale);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+
+    .export-btn {
+      white-space: nowrap;
+    }
+
     .answer-actions {
       display: flex;
       align-items: center;
@@ -472,6 +501,10 @@
     </nav>
 
     <div id="dashboard-status" class="dashboard-status" role="status" aria-live="polite"></div>
+    <div class="inbox-tools" aria-label="Answer tools">
+      <input id="answer-search" class="inbox-search" type="search" placeholder="Search answers or questions" aria-label="Search answers or questions">
+      <button id="export-answers-btn" class="admin-ghost-btn export-btn" type="button">Export answers</button>
+    </div>
     <main id="feed-container" class="dashboard-feed" aria-live="polite">
       <!-- Injected by JavaScript -->
     </main>
@@ -487,6 +520,8 @@
       const logoutBtn = document.getElementById("logout-btn");
       const feedContainer = document.getElementById("feed-container");
       const dashboardStatus = document.getElementById("dashboard-status");
+      const answerSearch = document.getElementById("answer-search");
+      const exportAnswersBtn = document.getElementById("export-answers-btn");
 
       const metricAnswered = document.getElementById("metric-answered");
       const metricQuestions = document.getElementById("metric-questions");
@@ -615,6 +650,26 @@
         });
       });
 
+      answerSearch.addEventListener("input", renderFeed);
+      exportAnswersBtn.addEventListener("click", exportAnswers);
+
+      function exportAnswers() {
+        if (!dashboardData || !Array.isArray(dashboardData.answers)) return;
+        const rows = [["Submission ID", "Question ID", "Question", "Answer", "Submitted At"]];
+        dashboardData.answers.forEach((answer) => rows.push([
+          answer.submission_id, answer.question_id, answer.question_text, answer.answer_text, answer.submitted_at
+        ]));
+        const csv = rows.map((row) => row.map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`).join(",")).join("\\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `birthday-answers-${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+        dashboardStatus.textContent = "Answers exported successfully.";
+      }
+
       function loadDashboardData() {
         if (dashboardStatus) dashboardStatus.textContent = "Loading saved answers...";
         fetch(`${API_BASE}/api/admin/data`, {
@@ -662,7 +717,12 @@
         const items = [];
 
         if (activeTab === "all" || activeTab === "answers" || activeTab === "inbox") {
-          answers.forEach((ans) => {
+          const searchTerm = (answerSearch.value || "").trim().toLowerCase();
+          answers.filter((ans) => {
+            if (!searchTerm) return true;
+            return [ans.question_text, ans.answer_text, ans.submission_id, String(ans.question_id)]
+              .some((value) => String(value || "").toLowerCase().includes(searchTerm));
+          }).forEach((ans) => {
             items.push({
               type: "answer",
               date: new Date(ans.submitted_at),

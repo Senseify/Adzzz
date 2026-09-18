@@ -120,8 +120,32 @@ const replyQuestionStmt = db.prepare(`
   WHERE id = ?
 `);
 
-// In-memory active session tokens for secure admin access
-const activeSessions = new Set();
+// Stateless signed admin sessions work across Vercel serverless instances.
+function createAdminSessionToken() {
+  const payload = Buffer.from(JSON.stringify({
+    exp: Date.now() + 7 * 24 * 60 * 60 * 1000
+  })).toString("base64url");
+  const signature = crypto.createHmac("sha256", ADMIN_PASSWORD).update(payload).digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+function isValidAdminSessionToken(token) {
+  if (!token || typeof token !== "string") return false;
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature) return false;
+
+  const expectedSignature = crypto.createHmac("sha256", ADMIN_PASSWORD).update(payload).digest("base64url");
+  const signaturesMatch = signature.length === expectedSignature.length &&
+    crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+  if (!signaturesMatch) return false;
+
+  try {
+    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    return Number.isFinite(session.exp) && session.exp > Date.now();
+  } catch {
+    return false;
+  }
+}
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
@@ -175,7 +199,7 @@ function requireAdmin(req, res, next) {
   const authHeader = req.headers.authorization;
   const bearerToken = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
   const token = req.cookies.admin_session || bearerToken;
-  if (token && activeSessions.has(token)) {
+  if (isValidAdminSessionToken(token)) {
     return next();
   }
   return res.status(401).json({ success: false, message: "Unauthorized. Please log in." });
@@ -284,8 +308,7 @@ app.post("/api/admin/login", (req, res) => {
     return res.status(401).json({ success: false, message: "Incorrect passkey." });
   }
 
-  const token = crypto.randomBytes(32).toString("hex");
-  activeSessions.add(token);
+  const token = createAdminSessionToken();
 
   res.cookie("admin_session", token, {
     httpOnly: true,
@@ -301,9 +324,6 @@ app.post("/api/admin/logout", (req, res) => {
   const authHeader = req.headers.authorization;
   const bearerToken = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
   const token = req.cookies.admin_session || bearerToken;
-  if (token) {
-    activeSessions.delete(token);
-  }
   res.clearCookie("admin_session");
   return res.json({ success: true, message: "Logged out." });
 });
@@ -312,7 +332,7 @@ app.get("/api/admin/check-auth", (req, res) => {
   const authHeader = req.headers.authorization;
   const bearerToken = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
   const token = req.cookies.admin_session || bearerToken;
-  const isAuthenticated = Boolean(token && activeSessions.has(token));
+  const isAuthenticated = isValidAdminSessionToken(token);
   return res.json({ authenticated: isAuthenticated });
 });
 
