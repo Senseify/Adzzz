@@ -126,7 +126,7 @@ const activeSessions = new Set();
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
   res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
@@ -352,6 +352,28 @@ app.get("/api/admin/data", requireAdmin, async (req, res) => {
   } catch (err) {
     console.error("Error fetching admin data:", err);
     return res.status(500).json({ success: false, message: "Failed to fetch dashboard data." });
+  }
+});
+
+// Explicitly delete one answer. No automatic cleanup or cascading deletes.
+app.delete("/api/admin/answers/:submissionId", requireAdmin, async (req, res) => {
+  const submissionId = String(req.params.submissionId || "").trim();
+  if (!submissionId) {
+    return res.status(400).json({ success: false, message: "Submission ID is required." });
+  }
+
+  try {
+    const result = await answerPool.query(
+      "DELETE FROM answer_submissions WHERE submission_id = $1 RETURNING submission_id",
+      [submissionId]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: "Answer was not found." });
+    }
+    return res.json({ success: true, submissionId });
+  } catch (err) {
+    console.error("Error deleting answer from Neon:", err);
+    return res.status(500).json({ success: false, message: "Failed to delete answer." });
   }
 });
 

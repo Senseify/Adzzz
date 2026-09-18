@@ -223,6 +223,11 @@
       color: var(--white);
     }
 
+    .admin-tab.inbox-tab {
+      border-color: rgba(215,122,168,0.42);
+      color: rgba(245,205,225,0.9);
+    }
+
     .admin-tab.active {
       border-color: var(--gold);
       background: radial-gradient(circle at 35% 35%, rgba(243,223,155,0.25) 0%, rgba(201,168,76,0.16) 100%);
@@ -351,6 +356,40 @@
       background: rgba(255,255,255,0.05);
     }
 
+    .dashboard-status {
+      min-height: 1.4rem;
+      margin: -0.8rem 0 1.4rem;
+      color: rgba(240,238,232,0.65);
+      font-size: 0.85rem;
+    }
+
+    .answer-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+
+    .delete-answer-btn {
+      min-height: 44px;
+      padding: 0.55rem 0.95rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,130,130,0.38);
+      background: rgba(255,100,100,0.08);
+      color: rgba(255,175,175,0.92);
+      cursor: pointer;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .delete-answer-btn:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+
     .empty-state {
       text-align: center;
       padding: 4rem 2rem;
@@ -424,14 +463,16 @@
       </div>
     </div>
 
-    <nav class="admin-tabs">
+    <nav class="admin-tabs" aria-label="Dashboard sections">
       <button class="admin-tab active" data-tab="all" type="button">All Activity</button>
+      <button class="admin-tab inbox-tab" data-tab="inbox" type="button">Inbox</button>
       <button class="admin-tab" data-tab="answers" type="button">Her Answers</button>
       <button class="admin-tab" data-tab="questions" type="button">Her Questions</button>
       <button class="admin-tab" data-tab="letter" type="button">Future Letter</button>
     </nav>
 
-    <main id="feed-container" class="dashboard-feed">
+    <div id="dashboard-status" class="dashboard-status" role="status" aria-live="polite"></div>
+    <main id="feed-container" class="dashboard-feed" aria-live="polite">
       <!-- Injected by JavaScript -->
     </main>
   </div>
@@ -445,6 +486,7 @@
       const authErr = document.getElementById("auth-err");
       const logoutBtn = document.getElementById("logout-btn");
       const feedContainer = document.getElementById("feed-container");
+      const dashboardStatus = document.getElementById("dashboard-status");
 
       const metricAnswered = document.getElementById("metric-answered");
       const metricQuestions = document.getElementById("metric-questions");
@@ -574,6 +616,7 @@
       });
 
       function loadDashboardData() {
+        if (dashboardStatus) dashboardStatus.textContent = "Loading saved answers...";
         fetch(`${API_BASE}/api/admin/data`, {
           credentials: "include",
           headers: getAuthHeaders()
@@ -587,13 +630,16 @@
             try {
               renderMetrics();
               renderFeed();
+              if (dashboardStatus) dashboardStatus.textContent = `${data.answers.length} saved answer${data.answers.length === 1 ? "" : "s"} loaded from the database.`;
             } catch (renderErr) {
               console.error("Dashboard render error:", renderErr);
             }
           })
           .catch((err) => {
             console.error("loadDashboardData error:", err);
-            showLogin();
+            if (dashboardStatus) dashboardStatus.textContent = "Could not load saved answers. Check the connection and refresh.";
+            feedContainer.innerHTML = `<div class="empty-state">We could not reach the answer database.</div>`;
+            if (err.message === "Unauthorized") showLogin();
           });
       }
 
@@ -615,7 +661,7 @@
         const { answers, questions, futureLetter } = dashboardData;
         const items = [];
 
-        if (activeTab === "all" || activeTab === "answers") {
+        if (activeTab === "all" || activeTab === "answers" || activeTab === "inbox") {
           answers.forEach((ans) => {
             items.push({
               type: "answer",
@@ -623,12 +669,15 @@
               html: `
                 <article class="feed-card">
                   <div class="feed-header">
-                    <span class="feed-badge">Her Answer — Question ${ans.question_id}</span>
+                    <span class="feed-badge">${activeTab === "inbox" ? "Inbox · " : ""}Answer — Question ${escapeHTML(String(ans.question_id))}</span>
                     <span class="feed-time">${formatTimestamp(ans.submitted_at)}</span>
                   </div>
                   <h3 class="feed-prompt">${escapeHTML(ans.question_text)}</h3>
                   <div class="feed-content">${escapeHTML(ans.answer_text)}</div>
-                  <div class="feed-time">Submission ID: ${escapeHTML(ans.submission_id)}</div>
+                  <div class="answer-actions">
+                    <span class="feed-time">Submitted ${formatTimestamp(ans.submitted_at)}<br>Submission ID: ${escapeHTML(ans.submission_id)}</span>
+                    <button class="delete-answer-btn" type="button" data-submission-id="${escapeHTML(ans.submission_id)}">Delete</button>
+                  </div>
                 </article>
               `
             });
@@ -694,6 +743,34 @@
         // Sort items by date descending
         items.sort((a, b) => b.date - a.date);
         feedContainer.innerHTML = items.map((i) => i.html).join("");
+
+        // Deletion is explicit, confirmed, and scoped to one submission ID.
+        document.querySelectorAll(".delete-answer-btn").forEach((button) => {
+          button.addEventListener("click", async () => {
+            const submissionId = button.dataset.submissionId;
+            if (!submissionId || !window.confirm("Delete this answer permanently? This cannot be undone.")) return;
+            button.disabled = true;
+            button.textContent = "Deleting...";
+            try {
+              const response = await fetch(`${API_BASE}/api/admin/answers/${encodeURIComponent(submissionId)}`, {
+                method: "DELETE",
+                credentials: "include",
+                headers: getAuthHeaders()
+              });
+              const result = await response.json().catch(() => ({}));
+              if (!response.ok || !result.success) throw new Error(result.message || "Failed to delete answer.");
+              dashboardData.answers = dashboardData.answers.filter((answer) => answer.submission_id !== submissionId);
+              renderMetrics();
+              renderFeed();
+              if (dashboardStatus) dashboardStatus.textContent = "Answer deleted from the database.";
+            } catch (error) {
+              console.error("Delete answer error:", error);
+              button.disabled = false;
+              button.textContent = "Delete";
+              if (dashboardStatus) dashboardStatus.textContent = error.message || "Could not delete the answer.";
+            }
+          });
+        });
 
         // Attach event listeners for reply forms
         document.querySelectorAll(".reply-form").forEach((form) => {
